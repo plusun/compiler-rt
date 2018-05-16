@@ -206,7 +206,7 @@ endif()
 # in the base system due to incompatibilities between FreeBSD's and Clang's
 # versions. As a workaround do not use --sysroot=. on FreeBSD until this is
 # addressed.
-if(COMPILER_RT_HAS_SYSROOT_FLAG AND NOT CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+if(COMPILER_RT_HAS_SYSROOT_FLAG AND NOT CMAKE_SYSTEM_NAME MATCHES "FreeBSD" AND NOT CMAKE_SYSTEM_NAME MATCHES "NetBSD")
   file(GLOB _tsan_generic_sources rtl/tsan*)
   file(GLOB _tsan_platform_sources rtl/tsan*posix* rtl/tsan*mac*
                                    rtl/tsan*linux*)
