@@ -93,6 +93,7 @@ extern "C" {
 
 #if SANITIZER_NETBSD
 #include <limits.h>  // For NAME_MAX
+#define sysctl _sysctl
 #include <sys/sysctl.h>
 #include <sys/exec.h>
 extern struct ps_strings *__ps_strings;

@@ -359,7 +359,7 @@ foreach(path IN ITEMS ${LLVM_MAIN_SRC_DIR}/projects/libcxx
                       ${LLVM_MAIN_SRC_DIR}/../libcxx
                       ${LLVM_EXTERNAL_LIBCXX_SOURCE_DIR})
   if(IS_DIRECTORY ${path})
-    set(COMPILER_RT_LIBCXX_PATH ${path})
+#    set(COMPILER_RT_LIBCXX_PATH ${path})
     break()
   endif()
 endforeach()
