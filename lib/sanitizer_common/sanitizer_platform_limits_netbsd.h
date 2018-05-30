@@ -386,9 +386,6 @@ extern unsigned path_max;
 
 extern int struct_ttyent_sz;
 
-extern int struct_kinfo_proc_sz;
-extern int struct_kinfo_proc2_sz;
-
 extern int ptrace_pt_io;
 extern int ptrace_pt_lwpinfo;
 extern int ptrace_pt_set_event_mask;
