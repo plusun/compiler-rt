@@ -3306,14 +3306,14 @@ INTERCEPTOR(INTMAX_T, strtoimax, const char *nptr, char **endptr, int base) {
   return res;
 }
 
-INTERCEPTOR(INTMAX_T, strtoumax, const char *nptr, char **endptr, int base) {
+INTERCEPTOR(UINTMAX_T, strtoumax, const char *nptr, char **endptr, int base) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, strtoumax, nptr, endptr, base);
   // FIXME: under ASan the call below may write to freed memory and corrupt
   // its metadata. See
   // https://github.com/google/sanitizers/issues/321.
   char *real_endptr;
-  INTMAX_T res = REAL(strtoumax)(nptr, &real_endptr, base);
+  UINTMAX_T res = REAL(strtoumax)(nptr, &real_endptr, base);
   StrtolFixAndCheck(ctx, nptr, endptr, real_endptr, base);
   return res;
 }
@@ -7527,14 +7527,14 @@ INTERCEPTOR(INTMAX_T, strtoi, const char * nptr, char ** endptr, int base,
   return ret;
 }
 
-INTERCEPTOR(INTMAX_T, strtou, const char * nptr, char ** endptr, int base,
-            INTMAX_T low, INTMAX_T high, int *rstatus) {
+INTERCEPTOR(UINTMAX_T, strtou, const char * nptr, char ** endptr, int base,
+            UINTMAX_T low, UINTMAX_T high, int *rstatus) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, strtou, nptr, endptr, base, low, high, rstatus);
 
   if (nptr)
     COMMON_INTERCEPTOR_READ_RANGE(ctx, nptr, REAL(strlen)(nptr) + 1);
-  INTMAX_T ret = REAL(strtou)(nptr, endptr, base, low, high, rstatus);
+  UINTMAX_T ret = REAL(strtou)(nptr, endptr, base, low, high, rstatus);
   if (endptr) {
     COMMON_INTERCEPTOR_WRITE_RANGE(ctx, endptr, sizeof(char *));
     if (*endptr)
