@@ -7506,16 +7506,17 @@ INTERCEPTOR(long long, strtonum, const char * nptr, long long minval,
     if (*errstr)
       COMMON_INTERCEPTOR_WRITE_RANGE(ctx, *errstr, REAL(strlen)(*errstr) + 1);
   }
+  return ret;
 }
 
-INTERCEPTOR(intmax_t, strtoi, const char * restrict nptr, char ** restrict endptr, int base,
-            intmax_t low, intmax_t high, int *rstatus) {
+INTERCEPTOR(INTMAX_T, strtoi, const char * nptr, char ** endptr, int base,
+            INTMAX_T low, INTMAX_T high, int *rstatus) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, strtoi, nptr, endptr, base, low, high, rstatus);
 
   if (nptr)
     COMMON_INTERCEPTOR_READ_RANGE(ctx, nptr, REAL(strlen)(nptr) + 1);
-  REAL(strtoi)(nptr, endptr, base, low, high, rstatus);
+  INTMAX_T ret = REAL(strtoi)(nptr, endptr, base, low, high, rstatus);
   if (endptr) {
     COMMON_INTERCEPTOR_WRITE_RANGE(ctx, endptr, sizeof(char *));
     if (*endptr)
@@ -7523,16 +7524,17 @@ INTERCEPTOR(intmax_t, strtoi, const char * restrict nptr, char ** restrict endpt
   }
   if (rstatus)
     COMMON_INTERCEPTOR_WRITE_RANGE(ctx, rstatus, sizeof(int));
+  return ret;
 }
 
-INTERCEPTOR(uintmax_t, strtou, const char * restrict nptr, char ** restrict endptr, int base,
-            uintmax_t low, uintmax_t high, int *rstatus) {
+INTERCEPTOR(INTMAX_T, strtou, const char * nptr, char ** endptr, int base,
+            INTMAX_T low, INTMAX_T high, int *rstatus) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, strtou, nptr, endptr, base, low, high, rstatus);
 
   if (nptr)
     COMMON_INTERCEPTOR_READ_RANGE(ctx, nptr, REAL(strlen)(nptr) + 1);
-  REAL(strtou)(nptr, endptr, base, low, high, rstatus);
+  INTMAX_T ret = REAL(strtou)(nptr, endptr, base, low, high, rstatus);
   if (endptr) {
     COMMON_INTERCEPTOR_WRITE_RANGE(ctx, endptr, sizeof(char *));
     if (*endptr)
@@ -7540,6 +7542,7 @@ INTERCEPTOR(uintmax_t, strtou, const char * restrict nptr, char ** restrict endp
   }
   if (rstatus)
     COMMON_INTERCEPTOR_WRITE_RANGE(ctx, rstatus, sizeof(int));
+  return ret;
 }
 
 #define INIT_STRTONUM \
