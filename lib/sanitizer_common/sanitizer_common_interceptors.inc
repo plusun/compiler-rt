@@ -7021,26 +7021,6 @@ INTERCEPTOR(void, strmode, u32 mode, char *bp) {
 #define INIT_STRMODE
 #endif
 
-#if SANITIZER_INTERCEPT_STRTONUM
-INTERCEPTOR(long long, strtonum, const char * nptr, long long minval,
-	    long long maxval, const char **errstr) {
-  void *ctx;
-  COMMON_INTERCEPTOR_ENTER(ctx, strtonum, nptr, minval, maxval, errstr);
-
-  if (nptr)
-    COMMON_INTERCEPTOR_READ_RANGE(ctx, nptr, REAL(strlen)(nptr) + 1);
-  long long ret = REAL(strtonum)(nptr, minval, maxval, errstr);
-  if (errstr) {
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, errstr, sizeof(const char *));
-    if (*errstr)
-      COMMON_INTERCEPTOR_WRITE_RANGE(ctx, *errstr, REAL(strlen)(*errstr) + 1);
-  }
-}
-#define INIT_STRTONUM COMMON_INTERCEPT_FUNCTION(strtonum)
-#else
-#define INIT_STRTONUM
-#endif
-
 #if SANITIZER_INTERCEPT_TTYENT
 INTERCEPTOR(struct __sanitizer_ttyent *, getttyent, void) {
   void *ctx;
@@ -7510,6 +7490,65 @@ INTERCEPTOR(SSIZE_T, regasub, char **buf, const char *sub,
   COMMON_INTERCEPT_FUNCTION(regasub);
 #else
 #define INIT_REGEX
+#endif
+
+#if SANITIZER_INTERCEPT_STRTONUM
+INTERCEPTOR(long long, strtonum, const char * nptr, long long minval,
+	    long long maxval, const char **errstr) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, strtonum, nptr, minval, maxval, errstr);
+
+  if (nptr)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, nptr, REAL(strlen)(nptr) + 1);
+  long long ret = REAL(strtonum)(nptr, minval, maxval, errstr);
+  if (errstr) {
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, errstr, sizeof(const char *));
+    if (*errstr)
+      COMMON_INTERCEPTOR_WRITE_RANGE(ctx, *errstr, REAL(strlen)(*errstr) + 1);
+  }
+}
+
+INTERCEPTOR(intmax_t, strtoi, const char * restrict nptr, char ** restrict endptr, int base,
+            intmax_t low, intmax_t high, int *rstatus) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, strtoi, nptr, endptr, base, low, high, rstatus);
+
+  if (nptr)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, nptr, REAL(strlen)(nptr) + 1);
+  REAL(strtoi)(nptr, endptr, base, low, high, rstatus);
+  if (endptr) {
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, endptr, sizeof(char *));
+    if (*endptr)
+      COMMON_INTERCEPTOR_WRITE_RANGE(ctx, *endptr, REAL(strlen)(*endptr) + 1);
+  }
+  if (rstatus)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, rstatus, sizeof(int));
+}
+
+INTERCEPTOR(uintmax_t, strtou, const char * restrict nptr, char ** restrict endptr, int base,
+            uintmax_t low, uintmax_t high, int *rstatus) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, strtou, nptr, endptr, base, low, high, rstatus);
+
+  if (nptr)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, nptr, REAL(strlen)(nptr) + 1);
+  REAL(strtou)(nptr, endptr, base, low, high, rstatus);
+  if (endptr) {
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, endptr, sizeof(char *));
+    if (*endptr)
+      COMMON_INTERCEPTOR_WRITE_RANGE(ctx, *endptr, REAL(strlen)(*endptr) + 1);
+  }
+  if (rstatus)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, rstatus, sizeof(int));
+}
+
+#define INIT_STRTONUM \
+  COMMON_INTERCEPT_FUNCTION(strtonum); \
+  COMMON_INTERCEPT_FUNCTION(strtoi); \
+  COMMON_INTERCEPT_FUNCTION(strtou)
+
+#else
+#define INIT_STRTONUM
 #endif
 
 static void InitializeCommonInterceptors() {
