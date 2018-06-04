@@ -7021,6 +7021,26 @@ INTERCEPTOR(void, strmode, u32 mode, char *bp) {
 #define INIT_STRMODE
 #endif
 
+#if SANITIZER_INTERCEPT_STRTONUM
+INTERCEPTOR(long long, strtonum, const char * nptr, long long minval,
+	    long long maxval, const char **errstr) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, strtonum, nptr, minval, maxval, errstr);
+
+  if (nptr)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, nptr, REAL(strlen)(nptr) + 1);
+  long long ret = REAL(strtonum)(nptr, minval, maxval, errstr);
+  if (errstr) {
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, errstr, sizeof(const char *));
+    if (*errstr)
+      COMMON_INTERCEPTOR_WRITE_RANGE(ctx, *errstr, REAL(strlen)(*errstr) + 1);
+  }
+}
+#define INIT_STRTONUM COMMON_INTERCEPT_FUNCTION(strtonum)
+#else
+#define INIT_STRTONUM
+#endif
+
 #if SANITIZER_INTERCEPT_TTYENT
 INTERCEPTOR(struct __sanitizer_ttyent *, getttyent, void) {
   void *ctx;
@@ -7742,6 +7762,7 @@ static void InitializeCommonInterceptors() {
   INIT_ATOF;
   INIT_FTS;
   INIT_REGEX;
+  INIT_STRTONUM;
 
   INIT___PRINTF_CHK;
 }
