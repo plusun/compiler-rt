@@ -7554,6 +7554,24 @@ INTERCEPTOR(UINTMAX_T, strtou, const char * nptr, char ** endptr, int base,
 #define INIT_STRTONUM
 #endif
 
+#if SANITIZER_INTERCEPT_VIS
+INTERCEPTOR(char *, vis, char *dst, int c, int flag, int nextc) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, vis, dst, c, flag, nextc);
+
+  char *end = REAL(vis)(dst, c, flag, nextc);
+  if (dst) {
+    // dst is NULL terminated and end points to the NULL char
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, end - dst + 1);
+  }
+  return end;
+}
+#define INIT_VIS \
+  COMMON_INTERCEPT_FUNCTION(vis)
+#else
+#define INIT_VIS
+#endif
+
 static void InitializeCommonInterceptors() {
   static u64 metadata_mem[sizeof(MetadataHashMap) / sizeof(u64) + 1];
   interceptor_metadata_map = new((void *)&metadata_mem) MetadataHashMap();
@@ -7805,6 +7823,7 @@ static void InitializeCommonInterceptors() {
   INIT_FTS;
   INIT_REGEX;
   INIT_STRTONUM;
+  INIT_VIS;
 
   INIT___PRINTF_CHK;
 }
