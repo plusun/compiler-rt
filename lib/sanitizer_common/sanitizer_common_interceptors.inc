@@ -7602,11 +7602,24 @@ INTERCEPTOR(int, stravis, char **dst, const char *src, int flag) {
   return len;
 }
 
+INTERCEPTOR(int, strnvis, char *dst, SIZE_T dlen, const char *src, int flag) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, strnvis, dst, dlen, src, flag);
+  if (src)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, src, REAL(strlen)(src) + 1);
+  int len = REAL(strnvis)(dst, dlen, src, flag);
+  // The interface will be valid even if there is no space for NULL char
+  if (dst)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, len);
+  return len;
+}
+
 #define INIT_VIS \
   COMMON_INTERCEPT_FUNCTION(vis); \
   COMMON_INTERCEPT_FUNCTION(nvis); \
   COMMON_INTERCEPT_FUNCTION(strvis); \
-  COMMON_INTERCEPT_FUNCTION(stravis)
+  COMMON_INTERCEPT_FUNCTION(stravis); \
+  COMMON_INTERCEPT_FUNCTION(strnvis)
 #else
 #define INIT_VIS
 #endif
