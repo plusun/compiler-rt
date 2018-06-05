@@ -7680,6 +7680,19 @@ INTERCEPTOR(char *, snvis, char *dst, SIZE_T dlen, int c, int flag, int nextc,
   return end;
 }
 
+INTERCEPTOR(int, strsvis, char *dst, const char *src, int flag, const char *extra) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, strsvis, dst, src, flag, extra);
+  if (src)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, src, REAL(strlen)(src) + 1);
+  if (extra)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, extra, REAL(strlen)(extra) + 1);
+  int len = REAL(strsvis)(dst, src, flag, extra);
+  if (dst)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, len + 1);
+  return len;
+}
+
 #define INIT_VIS \
   COMMON_INTERCEPT_FUNCTION(vis); \
   COMMON_INTERCEPT_FUNCTION(nvis); \
@@ -7690,7 +7703,8 @@ INTERCEPTOR(char *, snvis, char *dst, SIZE_T dlen, int c, int flag, int nextc,
   COMMON_INTERCEPT_FUNCTION(strnvisx); \
   COMMON_INTERCEPT_FUNCTION(strenvisx); \
   COMMON_INTERCEPT_FUNCTION(svis); \
-  COMMON_INTERCEPT_FUNCTION(snvis)
+  COMMON_INTERCEPT_FUNCTION(snvis); \
+  COMMON_INTERCEPT_FUNCTION(strsvis)
 #else
 #define INIT_VIS
 #endif
