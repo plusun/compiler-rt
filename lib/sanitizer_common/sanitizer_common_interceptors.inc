@@ -7560,10 +7560,19 @@ INTERCEPTOR(char *, vis, char *dst, int c, int flag, int nextc) {
   COMMON_INTERCEPTOR_ENTER(ctx, vis, dst, c, flag, nextc);
 
   char *end = REAL(vis)(dst, c, flag, nextc);
-  if (dst) {
-    // dst is NULL terminated and end points to the NULL char
+  // dst is NULL terminated and end points to the NULL char
+  if (dst)
     COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, end - dst + 1);
-  }
+  return end;
+}
+INTERCEPTOR(char *, nvis, char *dst, SIZE_T dlen, int c, int flag, int nextc) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, nvis, dst, dlen, c, flag, nextc);
+
+  char *end = REAL(nvis)(dst, dlen, c, flag, nextc);
+  // nvis cannot make sure the dst is NULL terminated
+  if (dst && end)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, end - dst);
   return end;
 }
 #define INIT_VIS \
