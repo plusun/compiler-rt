@@ -7644,7 +7644,7 @@ INTERCEPTOR(int, strenvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len,
   COMMON_INTERCEPTOR_ENTER(ctx, strenvisx, dst, dlen, src, len, flag, cerr_ptr);
   if (src)
     COMMON_INTERCEPTOR_READ_RANGE(ctx, src, len);
-  // FIXME: only need to be checked when "flag | VIS_NOLOCALE" holds
+  // FIXME: only need to be checked when "flag | VIS_NOLOCALE" doesn't hold
   // according to the implementation
   if (cerr_ptr)
     COMMON_INTERCEPTOR_READ_RANGE(ctx, cerr_ptr, sizeof(int));
@@ -7736,6 +7736,26 @@ INTERCEPTOR(int, strsnvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len,
   return ret;
 }
 
+INTERCEPTOR(int, strsenvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len, int flag,
+	    const char *extra, int *cerr_ptr) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, strsenvisx, dst, dlen, src, len, flag, extra, cerr_ptr);
+  if (src)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, src, len);
+  if (extra)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, extra, REAL(strlen)(extra) + 1);
+  // FIXME: only need to be checked when "flag | VIS_NOLOCALE" doesn't hold
+  // according to the implementation
+  if (cerr_ptr)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, cerr_ptr, sizeof(int));
+  int ret = REAL(strsenvisx)(dst, dlen, src, len, flag, extra, cerr_ptr);
+  if (dst && ret >= 0)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, (SIZE_T)ret + 1 < dlen ? ret + 1 : dlen);
+  if (cerr_ptr)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, cerr_ptr, sizeof(int));
+  return ret;
+}
+
 #define INIT_VIS \
   COMMON_INTERCEPT_FUNCTION(vis); \
   COMMON_INTERCEPT_FUNCTION(nvis); \
@@ -7750,7 +7770,8 @@ INTERCEPTOR(int, strsnvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len,
   COMMON_INTERCEPT_FUNCTION(strsvis); \
   COMMON_INTERCEPT_FUNCTION(strsnvis); \
   COMMON_INTERCEPT_FUNCTION(strsvisx); \
-  COMMON_INTERCEPT_FUNCTION(strsnvisx)
+  COMMON_INTERCEPT_FUNCTION(strsnvisx); \
+  COMMON_INTERCEPT_FUNCTION(strsenvisx)
 #else
 #define INIT_VIS
 #endif
