@@ -7609,8 +7609,8 @@ INTERCEPTOR(int, strnvis, char *dst, SIZE_T dlen, const char *src, int flag) {
     COMMON_INTERCEPTOR_READ_RANGE(ctx, src, REAL(strlen)(src) + 1);
   int len = REAL(strnvis)(dst, dlen, src, flag);
   // The interface will be valid even if there is no space for NULL char
-  if (dst)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, len);
+  if (dst && len >= 0)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, (SIZE_T)len + 1 < dlen ? len + 1 : dlen);
   return len;
 }
 
@@ -7631,8 +7631,26 @@ INTERCEPTOR(int, strnvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len, 
   if (src)
     COMMON_INTERCEPTOR_READ_RANGE(ctx, src, len);
   int ret = REAL(strnvisx)(dst, dlen, src, len, flag);
-  if (dst)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, ret);
+  if (dst && ret >= 0)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, (SIZE_T)ret + 1 < dlen ? ret + 1 : dlen);
+  return ret;
+}
+
+INTERCEPTOR(int, strenvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len, int flag,
+	    int *cerr_ptr) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, strenvisx, dst, dlen, src, len, flag, cerr_ptr);
+  if (src)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, src, len);
+  // FIXME: only need to be checked when "flag | VIS_NOLOCALE" holds
+  // according to the implementation
+  if (cerr_ptr)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, cerr_ptr, sizeof(int));
+  int ret = REAL(strenvisx)(dst, dlen, src, len, flag, cerr_ptr);
+  if (dst && ret >= 0)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, (SIZE_T)ret + 1 < dlen ? ret + 1 : dlen);
+  if (cerr_ptr)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, cerr_ptr, sizeof(int));
   return ret;
 }
 
@@ -7643,7 +7661,8 @@ INTERCEPTOR(int, strnvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len, 
   COMMON_INTERCEPT_FUNCTION(stravis); \
   COMMON_INTERCEPT_FUNCTION(strnvis); \
   COMMON_INTERCEPT_FUNCTION(strvisx); \
-  COMMON_INTERCEPT_FUNCTION(strnvisx)
+  COMMON_INTERCEPT_FUNCTION(strnvisx); \
+  COMMON_INTERCEPT_FUNCTION(strenvisx)
 #else
 #define INIT_VIS
 #endif
