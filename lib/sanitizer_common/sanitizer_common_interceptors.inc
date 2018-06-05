@@ -7693,6 +7693,21 @@ INTERCEPTOR(int, strsvis, char *dst, const char *src, int flag, const char *extr
   return len;
 }
 
+INTERCEPTOR(int, strsnvis, char *dst, SIZE_T dlen, const char *src, int flag,
+	    const char *extra) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, strsnvis, dst, dlen, src, flag, extra);
+  if (src)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, src, REAL(strlen)(src) + 1);
+  if (extra)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, extra, REAL(strlen)(extra) + 1);
+  int len = REAL(strsnvis)(dst, dlen, src, flag, extra);
+  // The interface will be valid even if there is no space for NULL char
+  if (dst && len >= 0)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, (SIZE_T)len + 1 < dlen ? len + 1 : dlen);
+  return len;
+}
+
 #define INIT_VIS \
   COMMON_INTERCEPT_FUNCTION(vis); \
   COMMON_INTERCEPT_FUNCTION(nvis); \
@@ -7704,7 +7719,8 @@ INTERCEPTOR(int, strsvis, char *dst, const char *src, int flag, const char *extr
   COMMON_INTERCEPT_FUNCTION(strenvisx); \
   COMMON_INTERCEPT_FUNCTION(svis); \
   COMMON_INTERCEPT_FUNCTION(snvis); \
-  COMMON_INTERCEPT_FUNCTION(strsvis)
+  COMMON_INTERCEPT_FUNCTION(strsvis); \
+  COMMON_INTERCEPT_FUNCTION(strsnvis)
 #else
 #define INIT_VIS
 #endif
