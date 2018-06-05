@@ -470,47 +470,6 @@ struct __sanitizer_ttyent {
   char *ty_class;
 };
 
-typedef u64 __sanitizer_fsblkcnt_t;
-typedef u64 __sanitizer_fsfilcnt_t;
-typedef struct { s32 __fsid_val[2]; } __sanitizer_fsid_t; /* file system id type */
-typedef u32 __sanitizer_uid_t;
-#define SANITIZER__VFS_NAMELEN 32
-#define SANITIZER__VFS_MNAMELEN 1024
-struct __sanitizer_statvfs {
-  unsigned long   f_flag;         /* copy of mount exported flags */
-  unsigned long   f_bsize;        /* file system block size */
-  unsigned long   f_frsize;       /* fundamental file system block size */
-  unsigned long   f_iosize;       /* optimal file system block size */
-
-  /* The following are in units of f_frsize */
-  __sanitizer_fsblkcnt_t      f_blocks;       /* number of blocks in file system, */
-  __sanitizer_fsblkcnt_t      f_bfree;        /* free blocks avail in file system */
-  __sanitizer_fsblkcnt_t      f_bavail;       /* free blocks avail to non-root */
-  __sanitizer_fsblkcnt_t      f_bresvd;       /* blocks reserved for root */
-
-  __sanitizer_fsfilcnt_t      f_files;        /* total file nodes in file system */
-  __sanitizer_fsfilcnt_t      f_ffree;        /* free file nodes in file system */
-  __sanitizer_fsfilcnt_t      f_favail;       /* free file nodes avail to non-root */
-  __sanitizer_fsfilcnt_t      f_fresvd;       /* file nodes reserved for root */
-
-  u64        f_syncreads;    /* count of sync reads since mount */
-  u64        f_syncwrites;   /* count of sync writes since mount */
-
-  u64        f_asyncreads;   /* count of async reads since mount */
-  u64        f_asyncwrites;  /* count of async writes since mount */
-
-  __sanitizer_fsid_t          f_fsidx;        /* NetBSD compatible fsid */
-  unsigned long   f_fsid;         /* Posix compatible fsid */
-  unsigned long   f_namemax;      /* maximum filename length */
-  __sanitizer_uid_t           f_owner;        /* user that mounted the file system */
-
-  u32        f_spare[4];     /* spare space */
-
-  char    f_fstypename[SANITIZER__VFS_NAMELEN]; /* fs type name */
-  char    f_mntonname[SANITIZER__VFS_MNAMELEN];  /* directory on which mounted */
-  char    f_mntfromname[SANITIZER__VFS_MNAMELEN];  /* mounted file system */
-};
-
 #define IOC_NRBITS 8
 #define IOC_TYPEBITS 8
 #define IOC_SIZEBITS 14

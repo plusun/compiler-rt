@@ -116,6 +116,7 @@
 #define times __times13
 #define wait3 __wait350
 #define wait4 __wait450
+#define getmntinfo __getmntinfo13
 extern const unsigned short *_ctype_tab_;
 extern const short *_toupper_tab_;
 extern const short *_tolower_tab_;
@@ -7777,17 +7778,15 @@ INTERCEPTOR(int, strsenvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len
 #endif
 
 #if SANITIZER_INTERCEPT_GETMNTINFO
-INTERCEPTOR(int, getmntinfo, struct __sanitizer_statvfs **mntbufp, int flags) {
+INTERCEPTOR(int, getmntinfo, void **mntbufp, int flags) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, getmntinfo, mntbufp, flags);
-  if (mntbufp)
-    COMMON_INTERCEPTOR_READ_RANGE(ctx, mntbufp, sizeof(struct __sanitizer_statvfs *));
   int cnt = REAL(getmntinfo)(mntbufp, flags);
   if (cnt > 0 && mntbufp) {
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, mntbufp, sizeof(struct __sanitizer_statvfs *));
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, mntbufp, sizeof(void *));
     if (*mntbufp)
       COMMON_INTERCEPTOR_WRITE_RANGE(ctx, *mntbufp,
-				     cnt * sizeof(struct __sanitizer_statvfs));
+				     cnt * struct_statvfs_sz);
   }
   return cnt;
 }
