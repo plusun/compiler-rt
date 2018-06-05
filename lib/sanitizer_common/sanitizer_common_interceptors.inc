@@ -7561,7 +7561,7 @@ INTERCEPTOR(char *, vis, char *dst, int c, int flag, int nextc) {
 
   char *end = REAL(vis)(dst, c, flag, nextc);
   // dst is NULL terminated and end points to the NULL char
-  if (dst)
+  if (dst && end)
     COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, end - dst + 1);
   return end;
 }
@@ -7573,7 +7573,9 @@ INTERCEPTOR(char *, nvis, char *dst, SIZE_T dlen, int c, int flag, int nextc) {
   char *end = REAL(nvis)(dst, dlen, c, flag, nextc);
   // nvis cannot make sure the dst is NULL terminated
   if (dst && end)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, end - dst);
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst,
+				   (SIZE_T)(end - dst + 1) < dlen ?
+				   end - dst + 1 : dlen);
   return end;
 }
 
@@ -7654,6 +7656,17 @@ INTERCEPTOR(int, strenvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len,
   return ret;
 }
 
+INTERCEPTOR(char *, svis, char *dst, int c, int flag, int nextc, const char *extra) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, svis, dst, c, flag, nextc, extra);
+  if (extra)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, extra, REAL(strlen)(extra) + 1);
+  char *end = REAL(svis)(dst, c, flag, nextc, extra);
+  if (dst && end)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, end - dst + 1);
+  return end;
+}
+
 #define INIT_VIS \
   COMMON_INTERCEPT_FUNCTION(vis); \
   COMMON_INTERCEPT_FUNCTION(nvis); \
@@ -7662,7 +7675,8 @@ INTERCEPTOR(int, strenvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len,
   COMMON_INTERCEPT_FUNCTION(strnvis); \
   COMMON_INTERCEPT_FUNCTION(strvisx); \
   COMMON_INTERCEPT_FUNCTION(strnvisx); \
-  COMMON_INTERCEPT_FUNCTION(strenvisx)
+  COMMON_INTERCEPT_FUNCTION(strenvisx); \
+  COMMON_INTERCEPT_FUNCTION(svis)
 #else
 #define INIT_VIS
 #endif
