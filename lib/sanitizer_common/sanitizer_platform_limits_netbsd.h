@@ -2206,6 +2206,7 @@ extern const int si_SEGV_MAPERR;
 extern const int si_SEGV_ACCERR;
 
 extern unsigned SHA1_CTX_sz;
+extern unsigned MD2_CTX_sz;
 }  // namespace __sanitizer
 
 #define CHECK_TYPE_SIZE(TYPE) \
