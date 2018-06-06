@@ -2204,6 +2204,8 @@ extern unsigned IOCTL_SNDCTL_DSP_SILENCE;
 
 extern const int si_SEGV_MAPERR;
 extern const int si_SEGV_ACCERR;
+
+extern unsigned SHA1_CTX_sz;
 }  // namespace __sanitizer
 
 #define CHECK_TYPE_SIZE(TYPE) \

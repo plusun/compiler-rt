@@ -185,6 +185,7 @@
 #include <sys/ptrace.h>
 #include <sys/resource.h>
 #include <sys/sem.h>
+#include <sys/sha1.h>
 #include <sys/shm.h>
 #include <sys/signal.h>
 #include <sys/socket.h>
@@ -2076,6 +2077,9 @@ unsigned IOCTL_SNDCTL_DSP_SILENCE = SNDCTL_DSP_SILENCE;
 
 const int si_SEGV_MAPERR = SEGV_MAPERR;
 const int si_SEGV_ACCERR = SEGV_ACCERR;
+
+unsigned SHA1_CTX_sz = sizeof(SHA1_CTX);
+
 }  // namespace __sanitizer
 
 using namespace __sanitizer;

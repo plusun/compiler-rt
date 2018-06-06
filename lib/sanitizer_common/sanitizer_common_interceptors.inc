@@ -7817,6 +7817,89 @@ INTERCEPTOR(int, fputs, const char *str, __sanitizer_FILE *stream) {
     COMMON_INTERCEPT_FUNCTION(puts); \
     COMMON_INTERCEPT_FUNCTION(fputs)
 #else
+#define INIT_PUTS
+#endif
+
+#if SANITIZER_INTERCEPT_SHA1
+
+INTERCEPTOR(void, SHA1Init, void *context) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, SHA1Init, context);
+  REAL(SHA1Init)(context);
+  COMMON_INTERCEPTOR_WRITE_RANGE(ctx, context, SHA1_CTX_sz);
+}
+
+INTERCEPTOR(void, SHA1Update, void *context, const u8 * data, unsigned len) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, SHA1Update, context, data, len);
+  if (data)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, data, len);
+  if (context)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, context, SHA1_CTX_sz);
+  REAL(SHA1Update)(context, data, len);
+}
+
+INTERCEPTOR(void, SHA1Final, u8 digest[20], void *context) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, SHA1Final, digest, context);
+  REAL(SHA1Final)(digest, context);
+  if (digest)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, digest, sizeof(digest));
+}
+
+INTERCEPTOR(void, SHA1Transform, u32 state[5], u8 buffer[64]) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, SHA1Transform, state, buffer);
+  if (state)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, state, sizeof(state));
+  if (buffer)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, buffer, sizeof(buffer));
+  REAL(SHA1Transform)(state, buffer);
+}
+
+INTERCEPTOR(char *, SHA1End, void *context, char *buf) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, SHA1End, context, buf);
+  if (context)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, context, SHA1_CTX_sz);
+  char *ret = REAL(SHA1End)(context, buf);
+  if (ret)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, 41); // according to the man page
+  return ret;
+}
+
+INTERCEPTOR(char *, SHA1File, char *filename, char *buf) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, SHA1File, filename, buf);
+  if (filename)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, filename, REAL(strlen)(filename) + 1);
+  char *ret = REAL(SHA1File)(filename, buf);
+  if (ret)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, 41); // according to the man page
+  return ret;
+}
+
+INTERCEPTOR(char *, SHA1Data, u8 *data, SIZE_T len, char *buf) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, SHA1Data, data, len, buf);
+  if (data)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, data, len);
+  char *ret = REAL(SHA1Data)(data, len, buf);
+  if (ret)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, 41); // according to the man page
+  return ret;
+}
+
+#define INIT_SHA1 \
+  COMMON_INTERCEPT_FUNCTION(SHA1Init); \
+  COMMON_INTERCEPT_FUNCTION(SHA1Update); \
+  COMMON_INTERCEPT_FUNCTION(SHA1Final); \
+  COMMON_INTERCEPT_FUNCTION(SHA1Transform); \
+  COMMON_INTERCEPT_FUNCTION(SHA1End); \
+  COMMON_INTERCEPT_FUNCTION(SHA1File); \
+  COMMON_INTERCEPT_FUNCTION(SHA1Data)
+#else
+#define INIT_SHA1
 #endif
 
 static void InitializeCommonInterceptors() {
@@ -8073,6 +8156,7 @@ static void InitializeCommonInterceptors() {
   INIT_VIS;
   INIT_GETMNTINFO;
   INIT_PUTS;
+  INIT_SHA1;
 
   INIT___PRINTF_CHK;
 }
