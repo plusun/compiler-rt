@@ -121,6 +121,7 @@
 #include <dev/wscons/wsconsio.h>
 #include <dev/wscons/wsdisplay_usl_io.h>
 #include <md2.h>
+#include <md4.h>
 #include <net/bpf.h>
 #include <net/if_atm.h>
 #include <net/if_gre.h>
@@ -2081,6 +2082,7 @@ const int si_SEGV_ACCERR = SEGV_ACCERR;
 
 unsigned SHA1_CTX_sz = sizeof(SHA1_CTX);
 unsigned MD2_CTX_sz = sizeof(MD2_CTX);
+unsigned MD4_CTX_sz = sizeof(MD4_CTX);
 }  // namespace __sanitizer
 
 using namespace __sanitizer;
