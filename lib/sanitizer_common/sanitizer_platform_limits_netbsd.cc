@@ -2081,8 +2081,11 @@ const int si_SEGV_MAPERR = SEGV_MAPERR;
 const int si_SEGV_ACCERR = SEGV_ACCERR;
 
 unsigned SHA1_CTX_sz = sizeof(SHA1_CTX);
+unsigned SHA1_return_length = 41;
 unsigned MD2_CTX_sz = sizeof(MD2_CTX);
+unsigned MD2_return_length = 33;
 unsigned MD4_CTX_sz = sizeof(MD4_CTX);
+unsigned MD4_return_length = 33;
 }  // namespace __sanitizer
 
 using namespace __sanitizer;

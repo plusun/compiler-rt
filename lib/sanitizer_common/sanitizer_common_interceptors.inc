@@ -7857,7 +7857,6 @@ INTERCEPTOR(void, SHA1Transform, u32 state[5], u8 buffer[64]) {
   REAL(SHA1Transform)(state, buffer);
 }
 
-#define SANITIZER_SHA1_RETURN_LENGTH 41
 INTERCEPTOR(char *, SHA1End, void *context, char *buf) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, SHA1End, context, buf);
@@ -7865,7 +7864,7 @@ INTERCEPTOR(char *, SHA1End, void *context, char *buf) {
     COMMON_INTERCEPTOR_READ_RANGE(ctx, context, SHA1_CTX_sz);
   char *ret = REAL(SHA1End)(context, buf);
   if (ret)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, SANITIZER_SHA1_RETURN_LENGTH);
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, SHA1_return_length);
   return ret;
 }
 
@@ -7876,7 +7875,7 @@ INTERCEPTOR(char *, SHA1File, char *filename, char *buf) {
     COMMON_INTERCEPTOR_READ_RANGE(ctx, filename, REAL(strlen)(filename) + 1);
   char *ret = REAL(SHA1File)(filename, buf);
   if (ret)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, SANITIZER_SHA1_RETURN_LENGTH);
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, SHA1_return_length);
   return ret;
 }
 
@@ -7887,11 +7886,9 @@ INTERCEPTOR(char *, SHA1Data, u8 *data, SIZE_T len, char *buf) {
     COMMON_INTERCEPTOR_READ_RANGE(ctx, data, len);
   char *ret = REAL(SHA1Data)(data, len, buf);
   if (ret)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, SANITIZER_SHA1_RETURN_LENGTH); 
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, SHA1_return_length);
   return ret;
 }
-
-#undef SANITIZER_SHA1_RETURN_LENGTH
 
 #define INIT_SHA1 \
   COMMON_INTERCEPT_FUNCTION(SHA1Init); \
@@ -7933,7 +7930,6 @@ INTERCEPTOR(void, MD2Final, unsigned char digest[16], void *context) {
     COMMON_INTERCEPTOR_WRITE_RANGE(ctx, digest, sizeof(unsigned char) * 16);
 }
 
-#define SANITIZER_MD2_RETURN_LENGTH 33
 INTERCEPTOR(char *, MD2End, void *context, char *buf) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, MD2End, context, buf);
@@ -7941,7 +7937,7 @@ INTERCEPTOR(char *, MD2End, void *context, char *buf) {
     COMMON_INTERCEPTOR_READ_RANGE(ctx, context, MD2_CTX_sz);
   char *ret = REAL(MD2End)(context, buf);
   if (ret)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, SANITIZER_MD2_RETURN_LENGTH);
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, MD2_return_length);
   return ret;
 }
 
@@ -7952,7 +7948,7 @@ INTERCEPTOR(char *, MD2File, const char *filename, char *buf) {
     COMMON_INTERCEPTOR_READ_RANGE(ctx, filename, REAL(strlen)(filename) + 1);
   char *ret = REAL(MD2File)(filename, buf);
   if (ret)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, SANITIZER_MD2_RETURN_LENGTH);
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, MD2_return_length);
   return ret;
 }
 
@@ -7963,10 +7959,9 @@ INTERCEPTOR(char *, MD2Data, const unsigned char *data, unsigned int len, char *
     COMMON_INTERCEPTOR_READ_RANGE(ctx, data, len);
   char *ret = REAL(MD2Data)(data, len, buf);
   if (ret)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, SANITIZER_MD2_RETURN_LENGTH);
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, MD2_return_length);
   return ret;
 }
-#undef SANITIZER_MD2_RETURN_LENGTH
 
 #define INIT_MD2 \
   COMMON_INTERCEPT_FUNCTION(MD2Init); \
@@ -8007,7 +8002,6 @@ INTERCEPTOR(void, MD4Final, unsigned char digest[16], void *context) {
     COMMON_INTERCEPTOR_WRITE_RANGE(ctx, digest, sizeof(unsigned char) * 16);
 }
 
-#define SANITIZER_MD4_RETURN_LENGTH 33
 INTERCEPTOR(char *, MD4End, void *context, char *buf) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, MD4End, context, buf);
@@ -8015,7 +8009,7 @@ INTERCEPTOR(char *, MD4End, void *context, char *buf) {
     COMMON_INTERCEPTOR_READ_RANGE(ctx, context, MD4_CTX_sz);
   char *ret = REAL(MD4End)(context, buf);
   if (ret)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, SANITIZER_MD4_RETURN_LENGTH);
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, MD4_return_length);
   return ret;
 }
 
@@ -8026,7 +8020,7 @@ INTERCEPTOR(char *, MD4File, const char *filename, char *buf) {
     COMMON_INTERCEPTOR_READ_RANGE(ctx, filename, REAL(strlen)(filename) + 1);
   char *ret = REAL(MD4File)(filename, buf);
   if (ret)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, SANITIZER_MD4_RETURN_LENGTH);
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, MD4_return_length);
   return ret;
 }
 
@@ -8037,10 +8031,9 @@ INTERCEPTOR(char *, MD4Data, const unsigned char *data, unsigned int len, char *
     COMMON_INTERCEPTOR_READ_RANGE(ctx, data, len);
   char *ret = REAL(MD4Data)(data, len, buf);
   if (ret)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, SANITIZER_MD4_RETURN_LENGTH);
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, MD4_return_length);
   return ret;
 }
-#undef SANITIZER_MD4_RETURN_LENGTH
 
 #define INIT_MD4 \
   COMMON_INTERCEPT_FUNCTION(MD4Init); \
