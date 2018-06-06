@@ -7796,6 +7796,29 @@ INTERCEPTOR(int, getmntinfo, void **mntbufp, int flags) {
 #define INIT_GETMNTINFO
 #endif
 
+#if SANITIZER_INTERCEPT_PUTS
+INTERCEPTOR(int, puts, const char *str) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, puts, str);
+  if (str)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, str, REAL(strlen)(str) + 1);
+  int ret = REAL(puts)(str);
+  return ret;
+}
+INTERCEPTOR(int, fputs, const char *str, __sanitizer_FILE *stream) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, fputs, str, stream);
+  if (str)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, str, REAL(strlen)(str) + 1);
+  int ret = REAL(fputs)(str, stream);
+  return ret;
+}
+#define INIT_PUTS \
+    COMMON_INTERCEPT_FUNCTION(puts); \
+    COMMON_INTERCEPT_FUNCTION(fputs)
+#else
+#endif
+
 static void InitializeCommonInterceptors() {
   static u64 metadata_mem[sizeof(MetadataHashMap) / sizeof(u64) + 1];
   interceptor_metadata_map = new((void *)&metadata_mem) MetadataHashMap();
@@ -8049,6 +8072,7 @@ static void InitializeCommonInterceptors() {
   INIT_STRTONUM;
   INIT_VIS;
   INIT_GETMNTINFO;
+  INIT_PUTS;
 
   INIT___PRINTF_CHK;
 }
