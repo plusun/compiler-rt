@@ -8146,6 +8146,27 @@ INTERCEPTOR(char *, nl_langinfo, long item) {
 #define INIT_NL_LANGINFO
 #endif
 
+#if SANITIZER_INTERCEPT_FPARSELN
+INTERCEPTOR(char *, fparseln, __sanitizer_FILE *stream, SIZE_T *len, SIZE_T *lineno,
+            const char delim[3], int flags) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, fparseln, stream, len, lineno, delim, flags);
+  if (len)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, len, sizeof(*len));
+  if (lineno)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, lineno, sizeof(*lineno));
+  if (delim)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, delim, sizeof(delim[0]) * 3);
+  char *ret = REAL(fparseln)(stream, len, lineno, delim, flags);
+  if (ret)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, REAL(strlen)(ret) + 1);
+  return ret;
+}
+#define INIT_FPARSELN COMMON_INTERCEPT_FUNCTION(fparseln)
+#else
+#define INIT_FPARSELN
+#endif
+
 static void InitializeCommonInterceptors() {
   static u64 metadata_mem[sizeof(MetadataHashMap) / sizeof(u64) + 1];
   interceptor_metadata_map = new((void *)&metadata_mem) MetadataHashMap();
@@ -8406,6 +8427,7 @@ static void InitializeCommonInterceptors() {
   INIT_MD5;
   INIT_GETVFSSTAT;
   INIT_NL_LANGINFO;
+  INIT_FPARSELN;
 
   INIT___PRINTF_CHK;
 }
