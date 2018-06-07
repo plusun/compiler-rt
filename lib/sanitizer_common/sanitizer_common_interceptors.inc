@@ -117,6 +117,7 @@
 #define wait3 __wait350
 #define wait4 __wait450
 #define getmntinfo __getmntinfo13
+#define mount __mount50
 extern const unsigned short *_ctype_tab_;
 extern const short *_toupper_tab_;
 extern const short *_tolower_tab_;
@@ -8313,6 +8314,42 @@ INTERCEPTOR(int, fstatvfs1, int fd, void *buf, int flags) {
 #define INIT_STATVFS1
 #endif
 
+#if SANITIZER_INTERCEPT_NETBSD_MOUNT
+
+INTERCEPTOR(int, mount, const char *type, const char *dir, int flags,
+            void *data, SIZE_T data_len) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, mount, type, dir, flags, data, data_len);
+  if (type)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, type, REAL(strlen)(type) + 1);
+  if (dir)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, dir, REAL(strlen)(dir) + 1);
+
+  // FIXME The data is a type-dependant structure which may contain
+  // pointers inside. It is necessary to check them separately. But
+  // the number of types is too large, temporarily relax this check
+  // here.
+  if (data)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, data, data_len);
+
+  return REAL(mount)(type, dir, flags, data, data_len);
+}
+
+INTERCEPTOR(int, unmount, const char *dir, int flags) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, unmount, dir, flags);
+  if (dir)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, dir, strlen(dir) + 1);
+  return REAL(unmount)(dir, flags);
+}
+
+#define INIT_NETBSD_MOUNT \
+  COMMON_INTERCEPT_FUNCTION(mount); \
+  COMMON_INTERCEPT_FUNCTION(unmount)
+#else
+#define INIT_NETBSD_MOUNT
+#endif
+
 static void InitializeCommonInterceptors() {
   static u64 metadata_mem[sizeof(MetadataHashMap) / sizeof(u64) + 1];
   interceptor_metadata_map = new((void *)&metadata_mem) MetadataHashMap();
@@ -8576,6 +8613,7 @@ static void InitializeCommonInterceptors() {
   INIT_FPARSELN;
   INIT_MODCTL;
   INIT_STATVFS1;
+  INIT_NETBSD_MOUNT;
 
   INIT___PRINTF_CHK;
 }
