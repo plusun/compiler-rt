@@ -7236,8 +7236,8 @@ INTERCEPTOR(int, sysctlbyname, char *sname, void *oldp, SIZE_T *oldlenp,
 }
 
 INTERCEPTOR(int, sysctlgetmibinfo, char *sname, int *name,
-            unsigned int *namelenp,
-            char *cname, SIZE_T *csz, void **rnode, int v) {
+            unsigned int *namelenp, char *cname, SIZE_T *csz, void **rnode,
+            int v) {
   void *ctx;
   int res;
   COMMON_INTERCEPTOR_ENTER(ctx, sysctlgetmibinfo, sname, name, namelenp, cname,
@@ -7304,12 +7304,12 @@ INTERCEPTOR(void *, asysctlbyname, const char *sname, SIZE_T *len) {
     COMMON_INTERCEPTOR_WRITE_RANGE(ctx, res, *len);
   return res;
 }
-#define INIT_SYSCTL \
-  COMMON_INTERCEPT_FUNCTION(sysctl); \
-  COMMON_INTERCEPT_FUNCTION(sysctlbyname); \
-  COMMON_INTERCEPT_FUNCTION(sysctlgetmibinfo); \
-  COMMON_INTERCEPT_FUNCTION(sysctlnametomib); \
-  COMMON_INTERCEPT_FUNCTION(asysctl); \
+#define INIT_SYSCTL                                                            \
+  COMMON_INTERCEPT_FUNCTION(sysctl);                                           \
+  COMMON_INTERCEPT_FUNCTION(sysctlbyname);                                     \
+  COMMON_INTERCEPT_FUNCTION(sysctlgetmibinfo);                                 \
+  COMMON_INTERCEPT_FUNCTION(sysctlnametomib);                                  \
+  COMMON_INTERCEPT_FUNCTION(asysctl);                                          \
   COMMON_INTERCEPT_FUNCTION(asysctlbyname);
 #else
 #define INIT_SYSCTL
@@ -7330,17 +7330,17 @@ INTERCEPTOR(double, atof, char *nptr) {
 #endif
 
 #if SANITIZER_INTERCEPT_FTS
-INTERCEPTOR(void *, fts_open, char * const *path_argv, int options,
+INTERCEPTOR(void *, fts_open, char *const *path_argv, int options,
             int (*compar)(void **, void **)) {
   void *ctx;
   void *fts;
   COMMON_INTERCEPTOR_ENTER(ctx, fts_open, path_argv, options, compar);
   if (path_argv) {
-    char * const *pa = path_argv;
+    char *const *pa = path_argv;
     while (*pa) {
-       COMMON_INTERCEPTOR_READ_RANGE(ctx, pa, sizeof(char **));
-       COMMON_INTERCEPTOR_READ_RANGE(ctx, *pa, REAL(strlen)(*pa) + 1);
-       pa++;
+      COMMON_INTERCEPTOR_READ_RANGE(ctx, pa, sizeof(char **));
+      COMMON_INTERCEPTOR_READ_RANGE(ctx, *pa, REAL(strlen)(*pa) + 1);
+      pa++;
     }
     COMMON_INTERCEPTOR_READ_RANGE(ctx, pa, sizeof(char **));
   }
@@ -7386,11 +7386,11 @@ INTERCEPTOR(int, fts_close, void *ftsp) {
   COMMON_INTERCEPTOR_READ_RANGE(ctx, ftsp, struct_FTS_sz);
   return REAL(fts_close)(ftsp);
 }
-#define INIT_FTS \
-  COMMON_INTERCEPT_FUNCTION(fts_open); \
-  COMMON_INTERCEPT_FUNCTION(fts_read); \
-  COMMON_INTERCEPT_FUNCTION(fts_children); \
-  COMMON_INTERCEPT_FUNCTION(fts_set); \
+#define INIT_FTS                                                               \
+  COMMON_INTERCEPT_FUNCTION(fts_open);                                         \
+  COMMON_INTERCEPT_FUNCTION(fts_read);                                         \
+  COMMON_INTERCEPT_FUNCTION(fts_children);                                     \
+  COMMON_INTERCEPT_FUNCTION(fts_set);                                          \
   COMMON_INTERCEPT_FUNCTION(fts_close);
 #else
 #define INIT_FTS
@@ -7482,20 +7482,20 @@ INTERCEPTOR(SSIZE_T, regasub, char **buf, const char *sub,
   }
   return res;
 }
-#define INIT_REGEX \
-  COMMON_INTERCEPT_FUNCTION(regcomp); \
-  COMMON_INTERCEPT_FUNCTION(regexec); \
-  COMMON_INTERCEPT_FUNCTION(regerror); \
-  COMMON_INTERCEPT_FUNCTION(regfree); \
-  COMMON_INTERCEPT_FUNCTION(regnsub); \
+#define INIT_REGEX                                                             \
+  COMMON_INTERCEPT_FUNCTION(regcomp);                                          \
+  COMMON_INTERCEPT_FUNCTION(regexec);                                          \
+  COMMON_INTERCEPT_FUNCTION(regerror);                                         \
+  COMMON_INTERCEPT_FUNCTION(regfree);                                          \
+  COMMON_INTERCEPT_FUNCTION(regnsub);                                          \
   COMMON_INTERCEPT_FUNCTION(regasub);
 #else
 #define INIT_REGEX
 #endif
 
 #if SANITIZER_INTERCEPT_STRTONUM
-INTERCEPTOR(long long, strtonum, const char * nptr, long long minval,
-	    long long maxval, const char **errstr) {
+INTERCEPTOR(long long, strtonum, const char *nptr, long long minval,
+            long long maxval, const char **errstr) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, strtonum, nptr, minval, maxval, errstr);
 
@@ -7510,7 +7510,7 @@ INTERCEPTOR(long long, strtonum, const char * nptr, long long minval,
   return ret;
 }
 
-INTERCEPTOR(INTMAX_T, strtoi, const char * nptr, char ** endptr, int base,
+INTERCEPTOR(INTMAX_T, strtoi, const char *nptr, char **endptr, int base,
             INTMAX_T low, INTMAX_T high, int *rstatus) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, strtoi, nptr, endptr, base, low, high, rstatus);
@@ -7528,7 +7528,7 @@ INTERCEPTOR(INTMAX_T, strtoi, const char * nptr, char ** endptr, int base,
   return ret;
 }
 
-INTERCEPTOR(UINTMAX_T, strtou, const char * nptr, char ** endptr, int base,
+INTERCEPTOR(UINTMAX_T, strtou, const char *nptr, char **endptr, int base,
             UINTMAX_T low, UINTMAX_T high, int *rstatus) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, strtou, nptr, endptr, base, low, high, rstatus);
@@ -7546,9 +7546,9 @@ INTERCEPTOR(UINTMAX_T, strtou, const char * nptr, char ** endptr, int base,
   return ret;
 }
 
-#define INIT_STRTONUM \
-  COMMON_INTERCEPT_FUNCTION(strtonum); \
-  COMMON_INTERCEPT_FUNCTION(strtoi); \
+#define INIT_STRTONUM                                                          \
+  COMMON_INTERCEPT_FUNCTION(strtonum);                                         \
+  COMMON_INTERCEPT_FUNCTION(strtoi);                                           \
   COMMON_INTERCEPT_FUNCTION(strtou)
 
 #else
@@ -7574,9 +7574,8 @@ INTERCEPTOR(char *, nvis, char *dst, SIZE_T dlen, int c, int flag, int nextc) {
   char *end = REAL(nvis)(dst, dlen, c, flag, nextc);
   // nvis cannot make sure the dst is NULL terminated
   if (dst && end)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst,
-				   (SIZE_T)(end - dst + 1) < dlen ?
-				   end - dst + 1 : dlen);
+    COMMON_INTERCEPTOR_WRITE_RANGE(
+        ctx, dst, (SIZE_T)(end - dst + 1) < dlen ? end - dst + 1 : dlen);
   return end;
 }
 
@@ -7613,7 +7612,8 @@ INTERCEPTOR(int, strnvis, char *dst, SIZE_T dlen, const char *src, int flag) {
   int len = REAL(strnvis)(dst, dlen, src, flag);
   // The interface will be valid even if there is no space for NULL char
   if (dst && len >= 0)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, (SIZE_T)len + 1 < dlen ? len + 1 : dlen);
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst,
+                                   (SIZE_T)len + 1 < dlen ? len + 1 : dlen);
   return len;
 }
 
@@ -7628,19 +7628,21 @@ INTERCEPTOR(int, strvisx, char *dst, const char *src, SIZE_T len, int flag) {
   return ret;
 }
 
-INTERCEPTOR(int, strnvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len, int flag) {
+INTERCEPTOR(int, strnvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len,
+            int flag) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, strnvisx, dst, dlen, src, len, flag);
   if (src)
     COMMON_INTERCEPTOR_READ_RANGE(ctx, src, len);
   int ret = REAL(strnvisx)(dst, dlen, src, len, flag);
   if (dst && ret >= 0)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, (SIZE_T)ret + 1 < dlen ? ret + 1 : dlen);
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst,
+                                   (SIZE_T)ret + 1 < dlen ? ret + 1 : dlen);
   return ret;
 }
 
-INTERCEPTOR(int, strenvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len, int flag,
-	    int *cerr_ptr) {
+INTERCEPTOR(int, strenvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len,
+            int flag, int *cerr_ptr) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, strenvisx, dst, dlen, src, len, flag, cerr_ptr);
   if (src)
@@ -7651,13 +7653,15 @@ INTERCEPTOR(int, strenvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len,
     COMMON_INTERCEPTOR_READ_RANGE(ctx, cerr_ptr, sizeof(int));
   int ret = REAL(strenvisx)(dst, dlen, src, len, flag, cerr_ptr);
   if (dst && ret >= 0)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, (SIZE_T)ret + 1 < dlen ? ret + 1 : dlen);
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst,
+                                   (SIZE_T)ret + 1 < dlen ? ret + 1 : dlen);
   if (cerr_ptr)
     COMMON_INTERCEPTOR_WRITE_RANGE(ctx, cerr_ptr, sizeof(int));
   return ret;
 }
 
-INTERCEPTOR(char *, svis, char *dst, int c, int flag, int nextc, const char *extra) {
+INTERCEPTOR(char *, svis, char *dst, int c, int flag, int nextc,
+            const char *extra) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, svis, dst, c, flag, nextc, extra);
   if (extra)
@@ -7669,19 +7673,20 @@ INTERCEPTOR(char *, svis, char *dst, int c, int flag, int nextc, const char *ext
 }
 
 INTERCEPTOR(char *, snvis, char *dst, SIZE_T dlen, int c, int flag, int nextc,
-	    const char *extra) {
+            const char *extra) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, snvis, dst, dlen, c, flag, nextc, extra);
   if (extra)
     COMMON_INTERCEPTOR_READ_RANGE(ctx, extra, REAL(strlen)(extra) + 1);
   char *end = REAL(snvis)(dst, dlen, c, flag, nextc, extra);
   if (dst && end)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst,
-				   (SIZE_T)(end - dst + 1) < dlen ? end - dst + 1 : dlen);
+    COMMON_INTERCEPTOR_WRITE_RANGE(
+        ctx, dst, (SIZE_T)(end - dst + 1) < dlen ? end - dst + 1 : dlen);
   return end;
 }
 
-INTERCEPTOR(int, strsvis, char *dst, const char *src, int flag, const char *extra) {
+INTERCEPTOR(int, strsvis, char *dst, const char *src, int flag,
+            const char *extra) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, strsvis, dst, src, flag, extra);
   if (src)
@@ -7695,7 +7700,7 @@ INTERCEPTOR(int, strsvis, char *dst, const char *src, int flag, const char *extr
 }
 
 INTERCEPTOR(int, strsnvis, char *dst, SIZE_T dlen, const char *src, int flag,
-	    const char *extra) {
+            const char *extra) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, strsnvis, dst, dlen, src, flag, extra);
   if (src)
@@ -7705,12 +7710,13 @@ INTERCEPTOR(int, strsnvis, char *dst, SIZE_T dlen, const char *src, int flag,
   int len = REAL(strsnvis)(dst, dlen, src, flag, extra);
   // The interface will be valid even if there is no space for NULL char
   if (dst && len >= 0)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, (SIZE_T)len + 1 < dlen ? len + 1 : dlen);
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst,
+                                   (SIZE_T)len + 1 < dlen ? len + 1 : dlen);
   return len;
 }
 
 INTERCEPTOR(int, strsvisx, char *dst, const char *src, SIZE_T len, int flag,
-	    const char *extra) {
+            const char *extra) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, strsvisx, dst, src, len, flag, extra);
   if (src)
@@ -7723,8 +7729,8 @@ INTERCEPTOR(int, strsvisx, char *dst, const char *src, SIZE_T len, int flag,
   return ret;
 }
 
-INTERCEPTOR(int, strsnvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len, int flag,
-	    const char *extra) {
+INTERCEPTOR(int, strsnvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len,
+            int flag, const char *extra) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, strsnvisx, dst, dlen, src, len, flag, extra);
   if (src)
@@ -7733,14 +7739,16 @@ INTERCEPTOR(int, strsnvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len,
     COMMON_INTERCEPTOR_READ_RANGE(ctx, extra, REAL(strlen)(extra) + 1);
   int ret = REAL(strsnvisx)(dst, dlen, src, len, flag, extra);
   if (dst && ret >= 0)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, (SIZE_T)ret + 1 < dlen ? ret + 1 : dlen);
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst,
+                                   (SIZE_T)ret + 1 < dlen ? ret + 1 : dlen);
   return ret;
 }
 
-INTERCEPTOR(int, strsenvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len, int flag,
-	    const char *extra, int *cerr_ptr) {
+INTERCEPTOR(int, strsenvisx, char *dst, SIZE_T dlen, const char *src,
+            SIZE_T len, int flag, const char *extra, int *cerr_ptr) {
   void *ctx;
-  COMMON_INTERCEPTOR_ENTER(ctx, strsenvisx, dst, dlen, src, len, flag, extra, cerr_ptr);
+  COMMON_INTERCEPTOR_ENTER(ctx, strsenvisx, dst, dlen, src, len, flag, extra,
+                           cerr_ptr);
   if (src)
     COMMON_INTERCEPTOR_READ_RANGE(ctx, src, len);
   if (extra)
@@ -7751,7 +7759,8 @@ INTERCEPTOR(int, strsenvisx, char *dst, SIZE_T dlen, const char *src, SIZE_T len
     COMMON_INTERCEPTOR_READ_RANGE(ctx, cerr_ptr, sizeof(int));
   int ret = REAL(strsenvisx)(dst, dlen, src, len, flag, extra, cerr_ptr);
   if (dst && ret >= 0)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, (SIZE_T)ret + 1 < dlen ? ret + 1 : dlen);
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst,
+                                   (SIZE_T)ret + 1 < dlen ? ret + 1 : dlen);
   if (cerr_ptr)
     COMMON_INTERCEPTOR_WRITE_RANGE(ctx, cerr_ptr, sizeof(int));
   return ret;
@@ -7763,8 +7772,7 @@ INTERCEPTOR(int, unvis, char *cp, int c, int *astate, int flag) {
   if (astate)
     COMMON_INTERCEPTOR_READ_RANGE(ctx, astate, sizeof(*astate));
   int ret = REAL(unvis)(cp, c, astate, flag);
-  if (ret == unvis_valid ||
-      ret == unvis_validpush) {
+  if (ret == unvis_valid || ret == unvis_validpush) {
     COMMON_INTERCEPTOR_WRITE_RANGE(ctx, cp, sizeof(*cp));
   }
   return ret;
@@ -7788,7 +7796,8 @@ INTERCEPTOR(int, strnunvis, char *dst, SIZE_T dlen, const char *src) {
     COMMON_INTERCEPTOR_READ_RANGE(ctx, src, REAL(strlen)(src) + 1);
   int ret = REAL(strnunvis)(dst, dlen, src);
   if (ret != -1)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, (SIZE_T)ret + 1 < dlen ? ret + 1 : dlen);
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst,
+                                   (SIZE_T)ret + 1 < dlen ? ret + 1 : dlen);
   return ret;
 }
 
@@ -7803,37 +7812,39 @@ INTERCEPTOR(int, strunvisx, char *dst, const char *src, int flag) {
   return ret;
 }
 
-INTERCEPTOR(int, strnunvisx, char *dst, SIZE_T dlen, const char *src, int flag) {
+INTERCEPTOR(int, strnunvisx, char *dst, SIZE_T dlen, const char *src,
+            int flag) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, strnunvisx, dst, dlen, src, flag);
   if (src)
     COMMON_INTERCEPTOR_READ_RANGE(ctx, src, REAL(strlen)(src) + 1);
   int ret = REAL(strnunvisx)(dst, dlen, src, flag);
   if (ret != -1)
-    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst, (SIZE_T)ret + 1 < dlen ? ret + 1 : dlen);
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, dst,
+                                   (SIZE_T)ret + 1 < dlen ? ret + 1 : dlen);
   return ret;
 }
 
-#define INIT_VIS \
-  COMMON_INTERCEPT_FUNCTION(vis); \
-  COMMON_INTERCEPT_FUNCTION(nvis); \
-  COMMON_INTERCEPT_FUNCTION(strvis); \
-  COMMON_INTERCEPT_FUNCTION(stravis); \
-  COMMON_INTERCEPT_FUNCTION(strnvis); \
-  COMMON_INTERCEPT_FUNCTION(strvisx); \
-  COMMON_INTERCEPT_FUNCTION(strnvisx); \
-  COMMON_INTERCEPT_FUNCTION(strenvisx); \
-  COMMON_INTERCEPT_FUNCTION(svis); \
-  COMMON_INTERCEPT_FUNCTION(snvis); \
-  COMMON_INTERCEPT_FUNCTION(strsvis); \
-  COMMON_INTERCEPT_FUNCTION(strsnvis); \
-  COMMON_INTERCEPT_FUNCTION(strsvisx); \
-  COMMON_INTERCEPT_FUNCTION(strsnvisx); \
-  COMMON_INTERCEPT_FUNCTION(strsenvisx); \
-  COMMON_INTERCEPT_FUNCTION(unvis); \
-  COMMON_INTERCEPT_FUNCTION(strunvis); \
-  COMMON_INTERCEPT_FUNCTION(strnunvis); \
-  COMMON_INTERCEPT_FUNCTION(strunvisx); \
+#define INIT_VIS                                                               \
+  COMMON_INTERCEPT_FUNCTION(vis);                                              \
+  COMMON_INTERCEPT_FUNCTION(nvis);                                             \
+  COMMON_INTERCEPT_FUNCTION(strvis);                                           \
+  COMMON_INTERCEPT_FUNCTION(stravis);                                          \
+  COMMON_INTERCEPT_FUNCTION(strnvis);                                          \
+  COMMON_INTERCEPT_FUNCTION(strvisx);                                          \
+  COMMON_INTERCEPT_FUNCTION(strnvisx);                                         \
+  COMMON_INTERCEPT_FUNCTION(strenvisx);                                        \
+  COMMON_INTERCEPT_FUNCTION(svis);                                             \
+  COMMON_INTERCEPT_FUNCTION(snvis);                                            \
+  COMMON_INTERCEPT_FUNCTION(strsvis);                                          \
+  COMMON_INTERCEPT_FUNCTION(strsnvis);                                         \
+  COMMON_INTERCEPT_FUNCTION(strsvisx);                                         \
+  COMMON_INTERCEPT_FUNCTION(strsnvisx);                                        \
+  COMMON_INTERCEPT_FUNCTION(strsenvisx);                                       \
+  COMMON_INTERCEPT_FUNCTION(unvis);                                            \
+  COMMON_INTERCEPT_FUNCTION(strunvis);                                         \
+  COMMON_INTERCEPT_FUNCTION(strnunvis);                                        \
+  COMMON_INTERCEPT_FUNCTION(strunvisx);                                        \
   COMMON_INTERCEPT_FUNCTION(strnunvisx)
 #else
 #define INIT_VIS
@@ -7847,8 +7858,7 @@ INTERCEPTOR(int, getmntinfo, void **mntbufp, int flags) {
   if (cnt > 0 && mntbufp) {
     COMMON_INTERCEPTOR_WRITE_RANGE(ctx, mntbufp, sizeof(void *));
     if (*mntbufp)
-      COMMON_INTERCEPTOR_WRITE_RANGE(ctx, *mntbufp,
-				     cnt * struct_statvfs_sz);
+      COMMON_INTERCEPTOR_WRITE_RANGE(ctx, *mntbufp, cnt * struct_statvfs_sz);
   }
   return cnt;
 }
@@ -7875,9 +7885,9 @@ INTERCEPTOR(int, fputs, const char *str, __sanitizer_FILE *stream) {
   int ret = REAL(fputs)(str, stream);
   return ret;
 }
-#define INIT_PUTS \
-    COMMON_INTERCEPT_FUNCTION(puts); \
-    COMMON_INTERCEPT_FUNCTION(fputs)
+#define INIT_PUTS                                                              \
+  COMMON_INTERCEPT_FUNCTION(puts);                                             \
+  COMMON_INTERCEPT_FUNCTION(fputs)
 #else
 #define INIT_PUTS
 #endif
@@ -7891,7 +7901,7 @@ INTERCEPTOR(void, SHA1Init, void *context) {
   COMMON_INTERCEPTOR_WRITE_RANGE(ctx, context, SHA1_CTX_sz);
 }
 
-INTERCEPTOR(void, SHA1Update, void *context, const u8 * data, unsigned len) {
+INTERCEPTOR(void, SHA1Update, void *context, const u8 *data, unsigned len) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, SHA1Update, context, data, len);
   if (data)
@@ -7952,13 +7962,13 @@ INTERCEPTOR(char *, SHA1Data, u8 *data, SIZE_T len, char *buf) {
   return ret;
 }
 
-#define INIT_SHA1 \
-  COMMON_INTERCEPT_FUNCTION(SHA1Init); \
-  COMMON_INTERCEPT_FUNCTION(SHA1Update); \
-  COMMON_INTERCEPT_FUNCTION(SHA1Final); \
-  COMMON_INTERCEPT_FUNCTION(SHA1Transform); \
-  COMMON_INTERCEPT_FUNCTION(SHA1End); \
-  COMMON_INTERCEPT_FUNCTION(SHA1File); \
+#define INIT_SHA1                                                              \
+  COMMON_INTERCEPT_FUNCTION(SHA1Init);                                         \
+  COMMON_INTERCEPT_FUNCTION(SHA1Update);                                       \
+  COMMON_INTERCEPT_FUNCTION(SHA1Final);                                        \
+  COMMON_INTERCEPT_FUNCTION(SHA1Transform);                                    \
+  COMMON_INTERCEPT_FUNCTION(SHA1End);                                          \
+  COMMON_INTERCEPT_FUNCTION(SHA1File);                                         \
   COMMON_INTERCEPT_FUNCTION(SHA1Data)
 #else
 #define INIT_SHA1
@@ -8014,7 +8024,8 @@ INTERCEPTOR(char *, MD2File, const char *filename, char *buf) {
   return ret;
 }
 
-INTERCEPTOR(char *, MD2Data, const unsigned char *data, unsigned int len, char *buf) {
+INTERCEPTOR(char *, MD2Data, const unsigned char *data, unsigned int len,
+            char *buf) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, MD2Data, data, len, buf);
   if (data)
@@ -8025,12 +8036,12 @@ INTERCEPTOR(char *, MD2Data, const unsigned char *data, unsigned int len, char *
   return ret;
 }
 
-#define INIT_MD2 \
-  COMMON_INTERCEPT_FUNCTION(MD2Init); \
-  COMMON_INTERCEPT_FUNCTION(MD2Update); \
-  COMMON_INTERCEPT_FUNCTION(MD2Final); \
-  COMMON_INTERCEPT_FUNCTION(MD2End); \
-  COMMON_INTERCEPT_FUNCTION(MD2File); \
+#define INIT_MD2                                                               \
+  COMMON_INTERCEPT_FUNCTION(MD2Init);                                          \
+  COMMON_INTERCEPT_FUNCTION(MD2Update);                                        \
+  COMMON_INTERCEPT_FUNCTION(MD2Final);                                         \
+  COMMON_INTERCEPT_FUNCTION(MD2End);                                           \
+  COMMON_INTERCEPT_FUNCTION(MD2File);                                          \
   COMMON_INTERCEPT_FUNCTION(MD2Data)
 #else
 #define INIT_MD2
@@ -8086,7 +8097,8 @@ INTERCEPTOR(char *, MD4File, const char *filename, char *buf) {
   return ret;
 }
 
-INTERCEPTOR(char *, MD4Data, const unsigned char *data, unsigned int len, char *buf) {
+INTERCEPTOR(char *, MD4Data, const unsigned char *data, unsigned int len,
+            char *buf) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, MD4Data, data, len, buf);
   if (data)
@@ -8097,12 +8109,12 @@ INTERCEPTOR(char *, MD4Data, const unsigned char *data, unsigned int len, char *
   return ret;
 }
 
-#define INIT_MD4 \
-  COMMON_INTERCEPT_FUNCTION(MD4Init); \
-  COMMON_INTERCEPT_FUNCTION(MD4Update); \
-  COMMON_INTERCEPT_FUNCTION(MD4Final); \
-  COMMON_INTERCEPT_FUNCTION(MD4End); \
-  COMMON_INTERCEPT_FUNCTION(MD4File); \
+#define INIT_MD4                                                               \
+  COMMON_INTERCEPT_FUNCTION(MD4Init);                                          \
+  COMMON_INTERCEPT_FUNCTION(MD4Update);                                        \
+  COMMON_INTERCEPT_FUNCTION(MD4Final);                                         \
+  COMMON_INTERCEPT_FUNCTION(MD4End);                                           \
+  COMMON_INTERCEPT_FUNCTION(MD4File);                                          \
   COMMON_INTERCEPT_FUNCTION(MD4Data)
 #else
 #define INIT_MD4
@@ -8158,7 +8170,8 @@ INTERCEPTOR(char *, MD5File, const char *filename, char *buf) {
   return ret;
 }
 
-INTERCEPTOR(char *, MD5Data, const unsigned char *data, unsigned int len, char *buf) {
+INTERCEPTOR(char *, MD5Data, const unsigned char *data, unsigned int len,
+            char *buf) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, MD5Data, data, len, buf);
   if (data)
@@ -8169,12 +8182,12 @@ INTERCEPTOR(char *, MD5Data, const unsigned char *data, unsigned int len, char *
   return ret;
 }
 
-#define INIT_MD5 \
-  COMMON_INTERCEPT_FUNCTION(MD5Init); \
-  COMMON_INTERCEPT_FUNCTION(MD5Update); \
-  COMMON_INTERCEPT_FUNCTION(MD5Final); \
-  COMMON_INTERCEPT_FUNCTION(MD5End); \
-  COMMON_INTERCEPT_FUNCTION(MD5File); \
+#define INIT_MD5                                                               \
+  COMMON_INTERCEPT_FUNCTION(MD5Init);                                          \
+  COMMON_INTERCEPT_FUNCTION(MD5Update);                                        \
+  COMMON_INTERCEPT_FUNCTION(MD5Final);                                         \
+  COMMON_INTERCEPT_FUNCTION(MD5End);                                           \
+  COMMON_INTERCEPT_FUNCTION(MD5File);                                          \
   COMMON_INTERCEPT_FUNCTION(MD5Data)
 #else
 #define INIT_MD5
@@ -8209,8 +8222,8 @@ INTERCEPTOR(char *, nl_langinfo, long item) {
 #endif
 
 #if SANITIZER_INTERCEPT_FPARSELN
-INTERCEPTOR(char *, fparseln, __sanitizer_FILE *stream, SIZE_T *len, SIZE_T *lineno,
-            const char delim[3], int flags) {
+INTERCEPTOR(char *, fparseln, __sanitizer_FILE *stream, SIZE_T *len,
+            SIZE_T *lineno, const char delim[3], int flags) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, fparseln, stream, len, lineno, delim, flags);
   if (len)
@@ -8261,8 +8274,8 @@ INTERCEPTOR(int, modctl, int operation, void *argp) {
     }
     ret = REAL(modctl)(operation, argp);
     if (iov)
-      COMMON_INTERCEPTOR_WRITE_RANGE(ctx, iov->iov_base,
-                                     iov_len < iov->iov_len ? iov_len : iov->iov_len);
+      COMMON_INTERCEPTOR_WRITE_RANGE(
+          ctx, iov->iov_base, iov_len < iov->iov_len ? iov_len : iov->iov_len);
   } else if (operation == modctl_exists)
     ret = REAL(modctl)(operation, argp);
   else
