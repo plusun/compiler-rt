@@ -397,7 +397,6 @@ void __msan_init() {
   InitTlsSize();
 
   CacheBinaryName();
-  CheckASLR();
   InitializeFlags();
 
   // Install tool-specific callbacks in sanitizer_common.

@@ -340,10 +340,6 @@ void ReExec() {
   UNIMPLEMENTED();
 }
 
-void CheckASLR() {
-  // Do nothing
-}
-
 uptr GetPageSize() {
   return sysconf(_SC_PAGESIZE);
 }
