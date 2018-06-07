@@ -211,6 +211,7 @@
 #include <utime.h>
 #include <utmp.h>
 #include <utmpx.h>
+#include <vis.h>
 #include <wchar.h>
 #include <wordexp.h>
 #include <ttyent.h>
@@ -2089,6 +2090,8 @@ unsigned MD4_CTX_sz = sizeof(MD4_CTX);
 unsigned MD4_return_length = 33;
 unsigned MD5_CTX_sz = sizeof(MD5_CTX);
 unsigned MD5_return_length = 33;
+int sanitizer_UNVIS_VALID = UNVIS_VALID;
+int sanitizer_UNVIS_VALIDPUSH = UNVIS_VALIDPUSH;
 }  // namespace __sanitizer
 
 using namespace __sanitizer;

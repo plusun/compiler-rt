@@ -2213,6 +2213,8 @@ extern unsigned MD4_CTX_sz;
 extern unsigned MD4_return_length;
 extern unsigned MD5_CTX_sz;
 extern unsigned MD5_return_length;
+extern int sanitizer_UNVIS_VALID;
+extern int sanitizer_UNVIS_VALIDPUSH;
 }  // namespace __sanitizer
 
 #define CHECK_TYPE_SIZE(TYPE) \
