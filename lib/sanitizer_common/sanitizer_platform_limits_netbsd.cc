@@ -181,6 +181,7 @@
 #include <sys/filio.h>
 #include <sys/ipc.h>
 #include <sys/mman.h>
+#include <sys/module.h>
 #include <sys/mount.h>
 #include <sys/mqueue.h>
 #include <sys/msg.h>
@@ -2090,8 +2091,12 @@ unsigned MD4_CTX_sz = sizeof(MD4_CTX);
 unsigned MD4_return_length = 33;
 unsigned MD5_CTX_sz = sizeof(MD5_CTX);
 unsigned MD5_return_length = 33;
-int sanitizer_UNVIS_VALID = UNVIS_VALID;
-int sanitizer_UNVIS_VALIDPUSH = UNVIS_VALIDPUSH;
+int unvis_valid = UNVIS_VALID;
+int unvis_validpush = UNVIS_VALIDPUSH;
+int modctl_load = MODCTL_LOAD;
+int modctl_unload = MODCTL_UNLOAD;
+int modctl_stat = MODCTL_STAT;
+int modctl_exists = MODCTL_EXISTS;
 }  // namespace __sanitizer
 
 using namespace __sanitizer;

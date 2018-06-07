@@ -2213,8 +2213,19 @@ extern unsigned MD4_CTX_sz;
 extern unsigned MD4_return_length;
 extern unsigned MD5_CTX_sz;
 extern unsigned MD5_return_length;
-extern int sanitizer_UNVIS_VALID;
-extern int sanitizer_UNVIS_VALIDPUSH;
+extern int unvis_valid;
+extern int unvis_validpush;
+
+typedef struct __sanitizer_modctl_load {
+  const char *ml_filename;
+  int ml_flags;
+  const char *ml_props;
+  uptr ml_propslen;
+} __sanitizer_modctl_load_t;
+extern int modctl_load;
+extern int modctl_unload;
+extern int modctl_stat;
+extern int modctl_exists;
 }  // namespace __sanitizer
 
 #define CHECK_TYPE_SIZE(TYPE) \

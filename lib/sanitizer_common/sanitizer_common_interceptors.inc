@@ -7763,8 +7763,8 @@ INTERCEPTOR(int, unvis, char *cp, int c, int *astate, int flag) {
   if (astate)
     COMMON_INTERCEPTOR_READ_RANGE(ctx, astate, sizeof(*astate));
   int ret = REAL(unvis)(cp, c, astate, flag);
-  if (ret == sanitizer_UNVIS_VALID ||
-      ret == sanitizer_UNVIS_VALIDPUSH) {
+  if (ret == unvis_valid ||
+      ret == unvis_validpush) {
     COMMON_INTERCEPTOR_WRITE_RANGE(ctx, cp, sizeof(*cp));
   }
   return ret;
@@ -8229,6 +8229,52 @@ INTERCEPTOR(char *, fparseln, __sanitizer_FILE *stream, SIZE_T *len, SIZE_T *lin
 #define INIT_FPARSELN
 #endif
 
+#if SANITIZER_INTERCEPT_MODCTL
+INTERCEPTOR(int, modctl, int operation, void *argp) {
+  void *ctx;
+  int ret;
+  COMMON_INTERCEPTOR_ENTER(ctx, modctl, operation, argp);
+
+  if (operation == modctl_load) {
+    if (argp) {
+      __sanitizer_modctl_load_t *ml = (__sanitizer_modctl_load_t *)argp;
+      COMMON_INTERCEPTOR_READ_RANGE(ctx, ml, sizeof(*ml));
+      if (ml->ml_filename)
+        COMMON_INTERCEPTOR_READ_RANGE(ctx, ml->ml_filename,
+                                      REAL(strlen)(ml->ml_filename) + 1);
+      if (ml->ml_props)
+        COMMON_INTERCEPTOR_READ_RANGE(ctx, ml->ml_props, ml->ml_propslen);
+    }
+    ret = REAL(modctl)(operation, argp);
+  } else if (operation == modctl_unload) {
+    if (argp) {
+      const char *name = (const char *)argp;
+      COMMON_INTERCEPTOR_READ_RANGE(ctx, name, REAL(strlen)(name) + 1);
+    }
+    ret = REAL(modctl)(operation, argp);
+  } else if (operation == modctl_stat) {
+    uptr iov_len;
+    struct __sanitizer_iovec *iov = (struct __sanitizer_iovec *)argp;
+    if (iov) {
+      COMMON_INTERCEPTOR_READ_RANGE(ctx, iov, sizeof(*iov));
+      iov_len = iov->iov_len;
+    }
+    ret = REAL(modctl)(operation, argp);
+    if (iov)
+      COMMON_INTERCEPTOR_WRITE_RANGE(ctx, iov->iov_base,
+                                     iov_len < iov->iov_len ? iov_len : iov->iov_len);
+  } else if (operation == modctl_exists)
+    ret = REAL(modctl)(operation, argp);
+  else
+    ret = REAL(modctl)(operation, argp);
+
+  return ret;
+}
+#define INIT_MODCTL COMMON_INTERCEPT_FUNCTION(modctl)
+#else
+#define INIT_MODCTL
+#endif
+
 static void InitializeCommonInterceptors() {
   static u64 metadata_mem[sizeof(MetadataHashMap) / sizeof(u64) + 1];
   interceptor_metadata_map = new((void *)&metadata_mem) MetadataHashMap();
@@ -8490,6 +8536,7 @@ static void InitializeCommonInterceptors() {
   INIT_GETVFSSTAT;
   INIT_NL_LANGINFO;
   INIT_FPARSELN;
+  INIT_MODCTL;
 
   INIT___PRINTF_CHK;
 }
