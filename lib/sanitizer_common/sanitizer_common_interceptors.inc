@@ -8118,6 +8118,20 @@ INTERCEPTOR(char *, MD5Data, const unsigned char *data, unsigned int len, char *
 #define INIT_MD5
 #endif
 
+#if SANITIZER_INTERCEPT_GETVFSSTAT
+INTERCEPTOR(int, getvfsstat, void *buf, SIZE_T bufsize, int flags) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, getvfsstat, buf, bufsize, flags);
+  int ret = REAL(getvfsstat)(buf, bufsize, flags);
+  if (buf && ret > 0)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, buf, ret * struct_statvfs_sz);
+  return ret;
+}
+#define INIT_GETVFSSTAT COMMON_INTERCEPT_FUNCTION(getvfsstat)
+#else
+#define INIT_GETVFSSTAT
+#endif
+
 static void InitializeCommonInterceptors() {
   static u64 metadata_mem[sizeof(MetadataHashMap) / sizeof(u64) + 1];
   interceptor_metadata_map = new((void *)&metadata_mem) MetadataHashMap();
@@ -8376,6 +8390,7 @@ static void InitializeCommonInterceptors() {
   INIT_MD2;
   INIT_MD4;
   INIT_MD5;
+  INIT_GETVFSSTAT;
 
   INIT___PRINTF_CHK;
 }
