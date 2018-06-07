@@ -4202,7 +4202,7 @@ INTERCEPTOR(int, fstatfs64, int fd, void *buf) {
 #endif
 
 #if SANITIZER_INTERCEPT_STATVFS
-INTERCEPTOR(int, statvfs, char *path, void *buf) {
+INTERCEPTOR(int, statvfs, const char *path, void *buf) {
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, statvfs, path, buf);
   if (path) COMMON_INTERCEPTOR_READ_RANGE(ctx, path, REAL(strlen)(path) + 1);
@@ -8288,6 +8288,31 @@ INTERCEPTOR(int, modctl, int operation, void *argp) {
 #define INIT_MODCTL
 #endif
 
+#if SANITIZER_INTERCEPT_STATVFS1
+INTERCEPTOR(int, statvfs1, const char *path, void *buf, int flags) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, statvfs1, path, buf, flags);
+  if (path) COMMON_INTERCEPTOR_READ_RANGE(ctx, path, REAL(strlen)(path) + 1);
+
+  int res = REAL(statvfs1)(path, buf, flags);
+  if (!res) COMMON_INTERCEPTOR_WRITE_RANGE(ctx, buf, struct_statvfs_sz);
+  return res;
+}
+INTERCEPTOR(int, fstatvfs1, int fd, void *buf, int flags) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, fstatvfs1, fd, buf, flags);
+
+  int res = REAL(fstatvfs1)(fd, buf, flags);
+  if (!res) COMMON_INTERCEPTOR_WRITE_RANGE(ctx, buf, struct_statvfs_sz);
+  return res;
+}
+#define INIT_STATVFS1                  \
+  COMMON_INTERCEPT_FUNCTION(statvfs1);  \
+  COMMON_INTERCEPT_FUNCTION(fstatvfs1);
+#else
+#define INIT_STATVFS1
+#endif
+
 static void InitializeCommonInterceptors() {
   static u64 metadata_mem[sizeof(MetadataHashMap) / sizeof(u64) + 1];
   interceptor_metadata_map = new((void *)&metadata_mem) MetadataHashMap();
@@ -8550,6 +8575,7 @@ static void InitializeCommonInterceptors() {
   INIT_NL_LANGINFO;
   INIT_FPARSELN;
   INIT_MODCTL;
+  INIT_STATVFS1;
 
   INIT___PRINTF_CHK;
 }
