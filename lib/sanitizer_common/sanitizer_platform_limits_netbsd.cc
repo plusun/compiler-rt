@@ -122,6 +122,7 @@
 #include <dev/wscons/wsdisplay_usl_io.h>
 #include <md2.h>
 #include <md4.h>
+#include <md5.h>
 #include <net/bpf.h>
 #include <net/if_atm.h>
 #include <net/if_gre.h>
@@ -2086,6 +2087,8 @@ unsigned MD2_CTX_sz = sizeof(MD2_CTX);
 unsigned MD2_return_length = 33;
 unsigned MD4_CTX_sz = sizeof(MD4_CTX);
 unsigned MD4_return_length = 33;
+unsigned MD5_CTX_sz = sizeof(MD5_CTX);
+unsigned MD5_return_length = 33;
 }  // namespace __sanitizer
 
 using namespace __sanitizer;
