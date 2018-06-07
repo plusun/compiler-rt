@@ -47,6 +47,7 @@
 #endif
 
 #if SANITIZER_NETBSD
+#define sysctl _sysctl
 #include <sys/sysctl.h>
 #include <sys/tls.h>
 #endif
