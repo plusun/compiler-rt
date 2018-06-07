@@ -8132,6 +8132,20 @@ INTERCEPTOR(int, getvfsstat, void *buf, SIZE_T bufsize, int flags) {
 #define INIT_GETVFSSTAT
 #endif
 
+#if SANITIZER_INTERCEPT_NL_LANGINFO
+INTERCEPTOR(char *, nl_langinfo, long item) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, nl_langinfo, item);
+  char *ret = REAL(nl_langinfo)(item);
+  if (ret)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, REAL(strlen)(ret) + 1);
+  return ret;
+}
+#define INIT_NL_LANGINFO COMMON_INTERCEPT_FUNCTION(nl_langinfo)
+#else
+#define INIT_NL_LANGINFO
+#endif
+
 static void InitializeCommonInterceptors() {
   static u64 metadata_mem[sizeof(MetadataHashMap) / sizeof(u64) + 1];
   interceptor_metadata_map = new((void *)&metadata_mem) MetadataHashMap();
@@ -8391,6 +8405,7 @@ static void InitializeCommonInterceptors() {
   INIT_MD4;
   INIT_MD5;
   INIT_GETVFSSTAT;
+  INIT_NL_LANGINFO;
 
   INIT___PRINTF_CHK;
 }
