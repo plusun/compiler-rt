@@ -2205,16 +2205,16 @@ extern unsigned IOCTL_SNDCTL_DSP_SILENCE;
 extern const int si_SEGV_MAPERR;
 extern const int si_SEGV_ACCERR;
 
-extern unsigned SHA1_CTX_sz;
-extern unsigned SHA1_return_length;
-extern unsigned MD2_CTX_sz;
-extern unsigned MD2_return_length;
-extern unsigned MD4_CTX_sz;
-extern unsigned MD4_return_length;
-extern unsigned MD5_CTX_sz;
-extern unsigned MD5_return_length;
-extern int unvis_valid;
-extern int unvis_validpush;
+extern const unsigned SHA1_CTX_sz;
+extern const unsigned SHA1_return_length;
+extern const unsigned MD2_CTX_sz;
+extern const unsigned MD2_return_length;
+extern const unsigned MD4_CTX_sz;
+extern const unsigned MD4_return_length;
+extern const unsigned MD5_CTX_sz;
+extern const unsigned MD5_return_length;
+extern const int unvis_valid;
+extern const int unvis_validpush;
 
 typedef struct __sanitizer_modctl_load {
   const char *ml_filename;
@@ -2222,10 +2222,10 @@ typedef struct __sanitizer_modctl_load {
   const char *ml_props;
   uptr ml_propslen;
 } __sanitizer_modctl_load_t;
-extern int modctl_load;
-extern int modctl_unload;
-extern int modctl_stat;
-extern int modctl_exists;
+extern const int modctl_load;
+extern const int modctl_unload;
+extern const int modctl_stat;
+extern const int modctl_exists;
 }  // namespace __sanitizer
 
 #define CHECK_TYPE_SIZE(TYPE) \
