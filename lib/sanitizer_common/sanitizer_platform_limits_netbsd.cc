@@ -146,6 +146,7 @@
 #include <sys/agpio.h>
 #include <sys/ataio.h>
 #include <sys/audioio.h>
+#include <sys/cdbr.h>
 #include <sys/cdio.h>
 #include <sys/chio.h>
 #include <sys/clockctl.h>
@@ -2263,6 +2264,11 @@ COMPILER_CHECK(SHA1_CTX_sz == sizeof(SHA1_CTX));
 COMPILER_CHECK(MD2_CTX_sz == sizeof(MD2_CTX));
 COMPILER_CHECK(MD4_CTX_sz == sizeof(MD4_CTX));
 COMPILER_CHECK(MD5_CTX_sz == sizeof(MD5_CTX));
-COMPILER_CHECK(sizeof(__sanitizer_modctl_load_t) == sizeof(modctl_load_t));
+
+CHECK_TYPE_SIZE(modctl_load_t);
+CHECK_SIZE_AND_OFFSET(modctl_load_t, ml_filename);
+CHECK_SIZE_AND_OFFSET(modctl_load_t, ml_flags);
+CHECK_SIZE_AND_OFFSET(modctl_load_t, ml_props);
+CHECK_SIZE_AND_OFFSET(modctl_load_t, ml_propslen);
 
 #endif  // SANITIZER_NETBSD
