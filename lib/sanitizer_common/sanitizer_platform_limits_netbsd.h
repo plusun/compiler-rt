@@ -2213,6 +2213,9 @@ extern const unsigned MD4_CTX_sz;
 extern const unsigned MD4_return_length;
 extern const unsigned MD5_CTX_sz;
 extern const unsigned MD5_return_length;
+extern const unsigned RMD160_CTX_sz;
+extern const unsigned RMD160_return_length;
+
 extern const int unvis_valid;
 extern const int unvis_validpush;
 

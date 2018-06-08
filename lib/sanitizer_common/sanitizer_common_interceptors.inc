@@ -8505,6 +8505,89 @@ INTERCEPTOR(void, cdbr_close, struct __sanitizer_cdbr *cdbr) {
 #define INIT_CDBR
 #endif
 
+#if SANITIZER_INTERCEPT_RMD160
+
+INTERCEPTOR(void, RMD160Init, void *context) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, RMD160Init, context);
+  REAL(RMD160Init)(context);
+  COMMON_INTERCEPTOR_WRITE_RANGE(ctx, context, RMD160_CTX_sz);
+}
+
+INTERCEPTOR(void, RMD160Update, void *context,
+            const unsigned char *data, unsigned int len) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, RMD160Update, context, data, len);
+  if (data)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, data, len);
+  if (context)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, context, RMD160_CTX_sz);
+  REAL(RMD160Update)(context, data, len);
+}
+
+INTERCEPTOR(void, RMD160Final, unsigned char digest[20], void *context) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, RMD160Final, digest, context);
+  REAL(RMD160Final)(digest, context);
+  if (digest)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, digest, sizeof(unsigned char) * 20);
+}
+
+INTERCEPTOR(void, RMD160Transform, u32 state[5], const u32 buffer[16]) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, RMD160Transform, state, buffer);
+  if (state)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, state, sizeof(u32) * 5);
+  if (buffer)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, buffer, sizeof(u32) * 16);
+  REAL(RMD160Transform)(state, buffer);
+}
+
+INTERCEPTOR(char *, RMD160End, void *context, char *buf) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, RMD160End, context, buf);
+  if (context)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, context, RMD160_CTX_sz);
+  char *ret = REAL(RMD160End)(context, buf);
+  if (ret)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, RMD160_return_length);
+  return ret;
+}
+
+INTERCEPTOR(char *, RMD160File, char *filename, char *buf) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, RMD160File, filename, buf);
+  if (filename)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, filename, REAL(strlen)(filename) + 1);
+  char *ret = REAL(RMD160File)(filename, buf);
+  if (ret)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, RMD160_return_length);
+  return ret;
+}
+
+INTERCEPTOR(char *, RMD160Data, unsigned char *data, SIZE_T len, char *buf) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, RMD160Data, data, len, buf);
+  if (data)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, data, len);
+  char *ret = REAL(RMD160Data)(data, len, buf);
+  if (ret)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, ret, RMD160_return_length);
+  return ret;
+}
+
+#define INIT_RMD160                                                              \
+  COMMON_INTERCEPT_FUNCTION(RMD160Init);                                         \
+  COMMON_INTERCEPT_FUNCTION(RMD160Update);                                       \
+  COMMON_INTERCEPT_FUNCTION(RMD160Final);                                        \
+  COMMON_INTERCEPT_FUNCTION(RMD160Transform);                                    \
+  COMMON_INTERCEPT_FUNCTION(RMD160End);                                          \
+  COMMON_INTERCEPT_FUNCTION(RMD160File);                                         \
+  COMMON_INTERCEPT_FUNCTION(RMD160Data)
+#else
+#define INIT_RMD160
+#endif
+
 static void InitializeCommonInterceptors() {
   static u64 metadata_mem[sizeof(MetadataHashMap) / sizeof(u64) + 1];
   interceptor_metadata_map = new((void *)&metadata_mem) MetadataHashMap();
@@ -8771,6 +8854,7 @@ static void InitializeCommonInterceptors() {
   INIT_NETBSD_MOUNT;
   INIT_FSEEK;
   INIT_CDBR;
+  INIT_RMD160;
 
   INIT___PRINTF_CHK;
 }

@@ -142,6 +142,7 @@
 #include <netinet6/nd6.h>
 #include <netnatm/natm.h>
 #include <netsmb/smb_dev.h>
+#include <rmd160.h>
 #include <soundcard.h>
 #include <sys/agpio.h>
 #include <sys/ataio.h>
@@ -2092,6 +2093,9 @@ const unsigned MD4_CTX_sz = sizeof(MD4_CTX);
 const unsigned MD4_return_length = 33;
 const unsigned MD5_CTX_sz = sizeof(MD5_CTX);
 const unsigned MD5_return_length = 33;
+const unsigned RMD160_CTX_sz = sizeof(RMD160_CTX);
+const unsigned RMD160_return_length = 41;
+
 const int unvis_valid = UNVIS_VALID;
 const int unvis_validpush = UNVIS_VALIDPUSH;
 const int modctl_load = MODCTL_LOAD;
