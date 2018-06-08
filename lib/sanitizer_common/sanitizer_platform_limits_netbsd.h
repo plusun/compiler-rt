@@ -2226,6 +2226,7 @@ extern const int modctl_load;
 extern const int modctl_unload;
 extern const int modctl_stat;
 extern const int modctl_exists;
+extern const unsigned fpos_t_sz;
 }  // namespace __sanitizer
 
 #define CHECK_TYPE_SIZE(TYPE) \
