@@ -8725,6 +8725,46 @@ SHA2_INTERCEPTORS(512, u64);
 #define INIT_SHA2
 #endif
 
+#if SANITIZER_INTERCEPT_GETCHAR
+INTERCEPTOR(int, fgetc, __sanitizer_FILE *stream) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, fgetc, stream);
+  return REAL(fgetc)(stream);
+}
+INTERCEPTOR(int, getc, __sanitizer_FILE *stream) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, getc, stream);
+  return REAL(getc)(stream);
+}
+
+INTERCEPTOR(int, getchar) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, getchar);
+  return REAL(getchar)();
+}
+
+INTERCEPTOR(int, getc_unlocked, __sanitizer_FILE *stream) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, getc_unlocked, stream);
+  return REAL(getc_unlocked)(stream);
+}
+
+INTERCEPTOR(int, getchar_unlocked) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, getchar_unlocked);
+  return REAL(getchar_unlocked)();
+}
+
+#define INIT_GETCHAR \
+  COMMON_INTERCEPT_FUNCTION(fgetc); \
+  COMMON_INTERCEPT_FUNCTION(getc); \
+  COMMON_INTERCEPT_FUNCTION(getchar); \
+  COMMON_INTERCEPT_FUNCTION(getc_unlocked); \
+  COMMON_INTERCEPT_FUNCTION(getchar_unlocked)
+#else
+#define INIT_GETCHAR
+#endif
+
 static void InitializeCommonInterceptors() {
   static u64 metadata_mem[sizeof(MetadataHashMap) / sizeof(u64) + 1];
   interceptor_metadata_map = new((void *)&metadata_mem) MetadataHashMap();
@@ -8993,6 +9033,7 @@ static void InitializeCommonInterceptors() {
   INIT_CDBR;
   INIT_RMD160;
   INIT_SHA2;
+  INIT_GETCHAR;
 
   INIT___PRINTF_CHK;
 }
