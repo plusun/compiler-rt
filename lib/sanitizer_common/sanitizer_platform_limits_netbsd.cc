@@ -2117,6 +2117,7 @@ const int modctl_unload = MODCTL_UNLOAD;
 const int modctl_stat = MODCTL_STAT;
 const int modctl_exists = MODCTL_EXISTS;
 const unsigned fpos_t_sz = sizeof(fpos_t);
+const int setvbuf_bufsiz = BUFSIZ;
 }  // namespace __sanitizer
 
 using namespace __sanitizer;

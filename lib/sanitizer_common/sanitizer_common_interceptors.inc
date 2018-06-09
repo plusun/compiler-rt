@@ -8765,6 +8765,41 @@ INTERCEPTOR(int, getchar_unlocked) {
 #define INIT_GETCHAR
 #endif
 
+#if SANITIZER_INTERCEPT_SETVBUF
+
+INTERCEPTOR(void, setbuf, __sanitizer_FILE *stream, char *buf) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, setbuf, stream, buf);
+  REAL(setbuf)(stream, buf);
+  if (buf)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, buf, setvbuf_bufsiz);
+}
+
+INTERCEPTOR(int, setvbuf, __sanitizer_FILE *stream, char *buf, int mode, SIZE_T size) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, setvbuf, stream, buf, mode, size);
+  int ret = REAL(setvbuf)(stream, buf, mode, size);
+  if (buf)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, buf, size);
+  return ret;
+}
+
+INTERCEPTOR(void, setbuffer, __sanitizer_FILE *stream, char *buf, SIZE_T size) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, setbuffer, stream, buf, size);
+  REAL(setbuffer)(stream, buf, size);
+  if (buf)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, buf, size);
+}
+
+#define INIT_SETVBUF \
+  COMMON_INTERCEPT_FUNCTION(setbuf); \
+  COMMON_INTERCEPT_FUNCTION(setbuffer); \
+  COMMON_INTERCEPT_FUNCTION(setvbuf)
+#else
+#define INIT_SETVBUF
+#endif
+
 static void InitializeCommonInterceptors() {
   static u64 metadata_mem[sizeof(MetadataHashMap) / sizeof(u64) + 1];
   interceptor_metadata_map = new((void *)&metadata_mem) MetadataHashMap();
@@ -9034,6 +9069,7 @@ static void InitializeCommonInterceptors() {
   INIT_RMD160;
   INIT_SHA2;
   INIT_GETCHAR;
+  INIT_SETVBUF;
 
   INIT___PRINTF_CHK;
 }

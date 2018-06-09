@@ -2267,6 +2267,8 @@ struct __sanitizer_cdbr {
   u8 entries_s1, entries_s2;
   u8 entries_index_s1, entries_index_s2;
 };
+
+extern const int setvbuf_bufsiz;
 }  // namespace __sanitizer
 
 #define CHECK_TYPE_SIZE(TYPE) \
