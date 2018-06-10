@@ -8800,6 +8800,22 @@ INTERCEPTOR(void, setbuffer, __sanitizer_FILE *stream, char *buf, SIZE_T size) {
 #define INIT_SETVBUF
 #endif
 
+#if SANITIZER_INTERCEPT_MI_VECTOR_HASH
+INTERCEPTOR(void, mi_vector_hash, const void *key, SIZE_T len, u32 seed,
+            u32 hashes[3]) {
+  void *ctx;
+  COMMON_INTERCEPTOR_ENTER(ctx, mi_vector_hash, key, len, seed, hashes);
+  if (key)
+    COMMON_INTERCEPTOR_READ_RANGE(ctx, key, len);
+  REAL(mi_vector_hash)(key, len, seed, hashes);
+  if (hashes)
+    COMMON_INTERCEPTOR_WRITE_RANGE(ctx, hashes, sizeof(hashes[0]) * 3);
+}
+#define INIT_MI_VECTOR_HASH COMMON_INTERCEPT_FUNCTION(mi_vector_hash)
+#else
+#define INIT_MI_VECTOR_HASH
+#endif
+
 static void InitializeCommonInterceptors() {
   static u64 metadata_mem[sizeof(MetadataHashMap) / sizeof(u64) + 1];
   interceptor_metadata_map = new((void *)&metadata_mem) MetadataHashMap();
@@ -9070,6 +9086,7 @@ static void InitializeCommonInterceptors() {
   INIT_SHA2;
   INIT_GETCHAR;
   INIT_SETVBUF;
+  INIT_MI_VECTOR_HASH;
 
   INIT___PRINTF_CHK;
 }
